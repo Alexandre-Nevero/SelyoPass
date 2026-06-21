@@ -1,1 +1,115 @@
 # SelyoPass
+
+> **One verified mark. Open doors everywhere.**
+
+## Overview
+
+SelyoPass is a reusable Know-Your-Business (KYB) identity credential built on the Stellar blockchain testnet.
+
+Early-stage startups and SMEs face a fragmented KYC/KYB onboarding process when integrating with banks, payment gateways, and regulated financial institutions. Every institution requires nearly the same business documents — SEC registration, BIR certificates, Mayor's Permits, Articles of Incorporation, Beneficial Ownership — yet each provider demands a separate submission, verification cycle, and follow-up timeline.
+
+SelyoPass solves this by letting businesses register their corporate identity once on-chain and share verifiable proof with any institution that needs it, eliminating weeks of redundant compliance paperwork.
+
+### Core Capabilities (Level 1 – White Belt)
+
+- **Wallet Connection** – Connect and disconnect a Freighter wallet on Stellar Testnet
+- **Balance Display** – Fetch and display the connected wallet's native XLM balance
+- **Transaction Flow** – Build, sign, and submit an XLM payment transaction on testnet
+- **Transaction Feedback** – Show success/failure states with transaction hash and Stellar Expert link
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 + Vite |
+| Blockchain | Stellar Testnet |
+| Wallet | Freighter Browser Extension |
+| SDK | `@stellar/stellar-sdk`, `@stellar/freighter-api` |
+
+---
+
+## Setup Instructions
+
+### Prerequisites
+
+- **Node.js** v18 or higher
+- **npm** or **yarn**
+- **Freighter Wallet** browser extension ([Install here](https://www.freighter.app/))
+- A funded Stellar **Testnet** account (use [Friendbot](https://friendbot.stellar.org/) to fund)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/SelyoPass.git
+cd SelyoPass
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+### Freighter Setup
+
+1. Install the Freighter browser extension.
+2. Create or import a wallet.
+3. Switch to **Testnet** in Freighter settings (Settings → Network → Testnet).
+4. Fund your testnet wallet via [Friendbot](https://friendbot.stellar.org/?addr=YOUR_PUBLIC_KEY).
+
+---
+
+## Usage
+
+1. Open the app and click **"Connect Freighter Wallet"**.
+2. Approve the connection in the Freighter popup.
+3. Your XLM balance will display automatically.
+4. Fill in the corporate identity form (Company Name, SEC Number).
+5. Click **"Submit Profile & Send XLM"** to create the on-chain transaction.
+6. Approve the transaction in Freighter.
+7. View the transaction result and click the link to see it on Stellar Expert.
+
+---
+
+## Screenshots for Submission
+
+> Replace these placeholders with actual screenshots before final submission.
+
+- **Wallet Connected State** – Shows the connected wallet address and balance
+  - `![Wallet Connected](./screenshots/wallet-connected.png)`
+
+- **Balance Displayed** – XLM balance fetched from Stellar Testnet Horizon
+  - `![Balance Displayed](./screenshots/balance-displayed.png)`
+
+- **Successful Testnet Transaction** – Transaction submitted and confirmed
+  - `![Transaction Success](./screenshots/transaction-success.png)`
+
+- **Transaction Result** – Success message with transaction hash and Stellar Expert link
+  - `![Transaction Result](./screenshots/transaction-result.png)`
+
+---
+
+## Project Structure
+
+```
+SelyoPass/
+├── index.html
+├── package.json
+├── vite.config.js
+├── src/
+│   ├── main.jsx
+│   ├── App.jsx        # Main application logic
+│   └── App.css        # Styling
+└── README.md
+```
+
+---
+
+## License
+
+This project is open source under the terms specified in the [LICENSE](./LICENSE) file.
