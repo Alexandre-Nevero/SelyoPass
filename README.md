@@ -43,7 +43,7 @@ SelyoPass solves this by letting businesses register their corporate identity on
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/SelyoPass.git
+git clone https://github.com/Alexandre-Nevero/SelyoPass.git
 cd SelyoPass
 
 # Install dependencies
@@ -78,19 +78,13 @@ The app will be available at `http://localhost:5173`.
 
 ## Screenshots for Submission
 
-> Replace these placeholders with actual screenshots before final submission.
+- **Wallet Connected & Balance Displayed** – Shows the connected wallet address and XLM balance
 
-- **Wallet Connected State** – Shows the connected wallet address and balance
-  - `![Wallet Connected](./screenshots/wallet-connected.png)`
+  ![Wallet Connected](./screenshots/wallet-connected-displayed.png)
 
-- **Balance Displayed** – XLM balance fetched from Stellar Testnet Horizon
-  - `![Balance Displayed](./screenshots/balance-displayed.png)`
+- **Successful Transaction & Result** – Transaction submitted successfully with confirmation on Stellar Expert
 
-- **Successful Testnet Transaction** – Transaction submitted and confirmed
-  - `![Transaction Success](./screenshots/transaction-success.png)`
-
-- **Transaction Result** – Success message with transaction hash and Stellar Expert link
-  - `![Transaction Result](./screenshots/transaction-result.png)`
+  ![Transaction Success](./screenshots/transaction-success-results.png)
 
 ---
 
