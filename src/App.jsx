@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import {
   isConnected,
-  getAddress,
+  requestAccess,
+  getPublicKey,
   signTransaction,
 } from '@stellar/freighter-api';
 import * as StellarSdk from '@stellar/stellar-sdk';
 
 const HORIZON_URL = 'https://horizon-testnet.stellar.org';
 const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
-const DEFAULT_TARGET = 'GA5ZSEJYB37JTY5VT36F7VJECQDZ4XGFX7X76EAG677G6LTY6A6S7452';
+const DEFAULT_TARGET = 'GB74JSPCCLGCGEOW4PP5UGOOF3IRBAJM5ELYNB4UW7KLUSN6DHKK5QJ3';
 
 function App() {
   const [publicKey, setPublicKey] = useState('');
@@ -45,24 +46,39 @@ function App() {
   async function connectWallet() {
     try {
       const connected = await isConnected();
-      if (!connected.isConnected) {
-        setStatus('Please install the Freighter wallet extension.');
+
+      if (!connected) {
+        setStatus(
+          'Freighter not detected. Make sure the extension is installed and enabled, then refresh the page.'
+        );
         return;
       }
 
-      const addressResult = await getAddress();
-      if (addressResult.error) {
-        setStatus('Connection rejected by user.');
+      // Request access — this prompts the user to approve the connection
+      const accessGranted = await requestAccess();
+
+      if (!accessGranted || accessGranted === 'denied') {
+        setStatus('Connection rejected. Please approve the connection in Freighter.');
         return;
       }
 
-      setPublicKey(addressResult.address);
+      // Get the public key after access is granted
+      const address = await getPublicKey();
+
+      if (!address) {
+        setStatus('Could not retrieve wallet address.');
+        return;
+      }
+
+      setPublicKey(address);
       setStatus('');
       setTxHash('');
       setTxSuccess(false);
     } catch (error) {
       console.error('Connect error:', error);
-      setStatus('Failed to connect wallet. Is Freighter installed?');
+      setStatus(
+        'Failed to connect wallet. Make sure Freighter is installed, unlocked, and try refreshing the page.'
+      );
     }
   }
 
@@ -123,11 +139,12 @@ function App() {
 
       setStatus('Awaiting signature from Freighter...');
 
-      const signResult = await signTransaction(transaction.toXDR(), {
+      const signedXdr = await signTransaction(transaction.toXDR(), {
         networkPassphrase: NETWORK_PASSPHRASE,
+        network: 'TESTNET',
       });
 
-      if (signResult.error) {
+      if (!signedXdr) {
         setStatus('Transaction signing was rejected.');
         return;
       }
@@ -135,7 +152,7 @@ function App() {
       setStatus('Registering profile on Stellar testnet...');
 
       const signedTx = StellarSdk.TransactionBuilder.fromXDR(
-        signResult.signedTxXdr,
+        signedXdr,
         NETWORK_PASSPHRASE
       );
 
