@@ -4,11 +4,13 @@
 
 ## Overview
 
-SelyoPass is a reusable Know-Your-Business (KYB) identity credential built on the Stellar blockchain testnet.
+SelyoPass is a portable Know Your Business (KYB) credential platform built on the Stellar blockchain.
 
-Early-stage startups and SMEs face a fragmented KYC/KYB onboarding process when integrating with banks, payment gateways, and regulated financial institutions. Every institution requires nearly the same business documents — SEC registration, BIR certificates, Mayor's Permits, Articles of Incorporation, Beneficial Ownership — yet each provider demands a separate submission, verification cycle, and follow-up timeline.
+Early-stage Philippine startups face fragmented and repetitive KYB onboarding when integrating with banks, payment gateways, and other regulated financial institutions. Every institution requires nearly identical business documents — SEC registration, BIR certificate, Mayor's Permit, Articles of Incorporation, beneficial ownership disclosure — and each runs an independent intake cycle even though they are verifying the same legal entity. The result is weeks of compounded delay before each integration goes live.
 
-SelyoPass solves this by letting businesses register their corporate identity once on-chain and share verifiable proof with any institution that needs it, eliminating weeks of redundant compliance paperwork.
+SelyoPass lets a startup verify its corporate identity once with a regulated Stellar anchor (initially PDAX), and present that signed, structured credential to every future bank, payment partner, or marketplace. Institutions skip the document collection step and complete their compliance work faster while keeping full decision authority. SelyoPass eliminates document collection, not compliance judgment.
+
+This repository is the Stellar Level 1 White Belt submission, which demonstrates the foundational on-chain mechanics. The full credential issuance and verification flow is on the roadmap toward Stellar Level 3 and the APAC Hackathon submission.
 
 ### Core Capabilities (Level 1 – White Belt)
 
