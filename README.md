@@ -113,7 +113,14 @@ the document hashes and shows a per-check result.
 
 ### On-chain artifact (testnet)
 
-A real testnet transaction anchoring a demo credential hash:
+**Soroban smart contract (F-002):**
+
+- **Contract address:** [`CBPJJP67GZ6LAQCDWG6JLO4QJQJ2BK3WXX3TA7VLSJW6BU4CHPR2ODW6`](https://stellar.expert/explorer/testnet/contract/CBPJJP67GZ6LAQCDWG6JLO4QJQJ2BK3WXX3TA7VLSJW6BU4CHPR2ODW6)
+- **Deploy tx:** [`f66fded0c91adb234bb579507194f2ca2bea4ecf881da8e8bf7c513e6f324ec2`](https://stellar.expert/explorer/testnet/tx/f66fded0c91adb234bb579507194f2ca2bea4ecf881da8e8bf7c513e6f324ec2)
+- **Interaction tx (issue):** [`640426230726c1250db44ba441c1a848b35fcda5481be375ad3ca1fcd0d45e4b`](https://stellar.expert/explorer/testnet/tx/640426230726c1250db44ba441c1a848b35fcda5481be375ad3ca1fcd0d45e4b)
+- **Deployer account:** [`GAO7LVRRR6TVNX34M5CHOZX6DF25XNLUXBCBBZH2LFCKG3FKF3GRP2VS`](https://stellar.expert/explorer/testnet/account/GAO7LVRRR6TVNX34M5CHOZX6DF25XNLUXBCBBZH2LFCKG3FKF3GRP2VS)
+
+**Classic anchoring (manageData):**
 
 - **Interaction tx hash:** [`3ec971accbb9b788fee6d4c2ac142b022c6abd6ea21667777fdd12a54e58c350`](https://stellar.expert/explorer/testnet/tx/3ec971accbb9b788fee6d4c2ac142b022c6abd6ea21667777fdd12a54e58c350)
 - **Anchoring account:** [`GBGGWBUTTJCQAQRF6DI3T4WKPSVWHZMWGAAKBWHNOG6BEKJMQD3PQXLT`](https://stellar.expert/explorer/testnet/account/GBGGWBUTTJCQAQRF6DI3T4WKPSVWHZMWGAAKBWHNOG6BEKJMQD3PQXLT)

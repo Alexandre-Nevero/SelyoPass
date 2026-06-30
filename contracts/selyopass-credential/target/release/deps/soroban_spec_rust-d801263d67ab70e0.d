@@ -1,0 +1,9 @@
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/release/deps/soroban_spec_rust-d801263d67ab70e0.d: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/trait.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/types.rs
+
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/release/deps/libsoroban_spec_rust-d801263d67ab70e0.rlib: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/trait.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/types.rs
+
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/release/deps/libsoroban_spec_rust-d801263d67ab70e0.rmeta: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/trait.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/types.rs
+
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/lib.rs:
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/trait.rs:
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-spec-rust-21.7.7/src/types.rs:

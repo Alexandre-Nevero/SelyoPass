@@ -1,0 +1,23 @@
+═══════════════════════════════════════════════════════════════
+            BUREAU OF INTERNAL REVENUE
+              Republic of the Philippines
+═══════════════════════════════════════════════════════════════
+
+      CERTIFICATE OF REGISTRATION (BIR Form 2303)
+
+Taxpayer: DSERVE TECHNOLOGIES INC.
+TIN: 999-999-999-000   ← TAMPERED (original was 123-456-789-000)
+RDO: Revenue District Office No. 39 - South Quezon City
+
+Date of Registration: March 20, 2024
+Line of Business: Information Technology Services
+Tax Types Registered: Income Tax, VAT, Withholding Tax
+
+Registered Address:
+  Unit 501, Tech Hub Building
+  123 Innovation Street, Quezon City
+  Metro Manila, Philippines
+
+═══════════════════════════════════════════════════════════════
+⚠️  THIS FILE WAS INTENTIONALLY MODIFIED TO DEMO TAMPER DETECTION
+═══════════════════════════════════════════════════════════════

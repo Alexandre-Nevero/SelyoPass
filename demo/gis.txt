@@ -1,0 +1,34 @@
+═══════════════════════════════════════════════════════════════
+    GENERAL INFORMATION SHEET (GIS) — SEC ANNUAL FILING
+═══════════════════════════════════════════════════════════════
+
+Company: DSERVE TECHNOLOGIES INC.
+SEC Registration No.: CS202412345
+Fiscal Year End: December 31
+Date Filed: January 15, 2025
+
+CORPORATE INFORMATION
+  Principal Office: Unit 501, Tech Hub Building, Quezon City
+  Telephone: +63 2 8888 0001
+  Email: info@dserve-demo.ph
+  Industry: IT and Business Process Management
+
+BENEFICIAL OWNERSHIP DISCLOSURE (SEC MC No. 15, s.2025)
+  ┌────────────────────┬─────────────┬───────────┐
+  │ Name               │ Nationality │ % Owned   │
+  ├────────────────────┼─────────────┼───────────┤
+  │ Juan Dela Cruz     │ Filipino    │ 60%       │
+  │ Maria Santos       │ Filipino    │ 40%       │
+  └────────────────────┴─────────────┴───────────┘
+
+  No beneficial owner holds shares through intermediaries.
+  No foreign beneficial owner.
+
+DIRECTORS & OFFICERS
+  Chairman / President: Juan Dela Cruz
+  Treasurer: Maria Santos
+  Corporate Secretary: Ana Reyes (synthetic)
+
+═══════════════════════════════════════════════════════════════
+⚠️  THIS IS A SYNTHETIC DEMO DOCUMENT — NOT A REAL GIS FILING
+═══════════════════════════════════════════════════════════════
