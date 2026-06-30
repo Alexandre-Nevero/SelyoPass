@@ -1,0 +1,63 @@
+{
+  "name": "idea-forge",
+  "description": "AI-operated kit that authors one frozen, source-tagged idea.md that a deterministic linter can accept or reject. Stage 1 of a two-kit pipeline: the INPUT stage that feeds the FMD (Foundational Matrix Documents) factory.",
+  "schemaVersion": "1.0.0",
+  "fmdContract": "FMD-CONTRACT.md",
+  "schema": {
+    "template": "schema/idea.template.md",
+    "rules": "schema/idea.schema.md",
+    "contract": "idea.md",
+    "frontmatter": {
+      "status": "draft | frozen | rejected",
+      "schema_version": "semver; required to freeze; FMD pins compatibility to it"
+    },
+    "requiredSections": [
+      "Problem statement",
+      "Target segment",
+      "Evidence",
+      "Root cause (the WHY)",
+      "Market & alternatives",
+      "Value proposition",
+      "Feature set",
+      "Success metrics",
+      "Constraints, risks & kill criteria",
+      "Out of scope (for now)"
+    ]
+  },
+  "gate": {
+    "entrypoint": "lint/validate.sh",
+    "implementation": "lint/validate.py",
+    "runtime": "python3 (standard library only)",
+    "evidenceFloor": {
+      "minBehavioral": 3,
+      "minDistinctSources": 3,
+      "minPaid": 1,
+      "saidOnly": "REJECT"
+    },
+    "overridable": false,
+    "notes": "Evidence floor and section presence are never overridable. --override only relaxes [unverified]/untagged-claim gates and requires a logged reason."
+  },
+  "operatingBrain": "AGENTS.md",
+  "subagents": {
+    "orchestrator": "subagents/orchestrator.md",
+    "interviewer": "subagents/interviewer.md",
+    "researcher": "subagents/researcher.md",
+    "redTeam": "subagents/red-team.md",
+    "validator": "subagents/validator.md"
+  },
+  "process": [
+    "00-process/overview.md",
+    "00-process/problem-validation.md",
+    "00-process/market-research.md"
+  ],
+  "playbooks": [
+    "playbooks/how-to-write-idea.md",
+    "playbooks/interview-and-validation.md",
+    "playbooks/research-prompts.md"
+  ],
+  "examples": [
+    "examples/sample-idea.md"
+  ],
+  "distribution": "template / degit / clone (never submodule)",
+  "handoff": "Freeze idea.md, copy ONLY idea.md into the build project, add FMD there. FMD vendors a pinned copy of subagents/validator.md as its entry gate."
+}

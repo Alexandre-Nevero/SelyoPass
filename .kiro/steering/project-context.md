@@ -20,18 +20,22 @@ This document mixes confirmed facts with working assumptions. Be explicit about 
 ### Validated
 
 - **Dserve's pain is real (n=1).** A founder unprompted described submitting nearly identical compliance documents to UnionBank, Xendit, GCash for Business, and Google programs, with weeks of compounded delay before launch.
+- **The underlying pain pattern is recognized across APAC and globally.** Independent industry sources (Deloitte, McKinsey, fintech.global, Statrys, Backbase) quantify commercial onboarding at 4 to 16+ weeks and $20-30k per client. Industry voices articulate the "same client onboarded multiple times by different parties" problem without naming SelyoPass. See "Regional Market Evidence" section.
+- **The pain pattern exists in adjacent APAC markets.** Indonesia (fragmented AHU + OSS registries, Bahasa-only), Malaysia (BNM + new digital banks), Vietnam (foreign-founder compliance friction) all show structural similarities to the Philippine BSP + SEC fragmentation pattern.
 - **Technical stack works on testnet.** Wallet connect, balance fetch, transaction build, sign, and submit are all working through Freighter and Horizon.
 - **SEP-12 exists as a Stellar standard** for exchanging KYC and KYB data between anchors and clients.
 - **PDAX is a Stellar anchor** with BSP VASP licensing operating on SEP-24 rails.
 - **Compliance authority cannot be outsourced.** BSP Circular 1170 and AMLA implementing rules place the customer due diligence obligation on the regulated entity. No architecture changes this.
+- **No business-side portable KYB credential exists in the visible APAC competitive set.** Institution-side incumbents (AsiaVerify, HyperVerge, Sumsub, Persona, Dotfile, Muinmos) and regulator-led precedents (Singapore Myinfo Business, India Account Aggregator) both leave the business-owned credential lane unoccupied in the addressable market.
 
 ### Hypothesis (to be tested)
 
-- That Dserve's pain generalizes to other Philippine startups doing financial integrations.
+- That Dserve's specific pain pattern generalizes to other Philippine startups doing financial integrations (Thursday founder interviews).
 - That startups will pay for a portable credential that saves them onboarding cycles across multiple partners.
 - That at least one regulated institution will accept SEP-12-formatted KYB credentials as preferred intake within six months of launch.
 - That PDAX (or an equivalent anchor) will agree to be the bootstrap issuer and first relying party.
-- That the credential remains valuable as it expands across SEA jurisdictions.
+- That the credential design extends cleanly across SEA jurisdictions (Indonesia, Vietnam, Malaysia), not just the Philippines.
+- That BSP does not announce a Myinfo Business equivalent before SelyoPass establishes traction (existential timing risk).
 - That the founder-market fit gap (Alex did not personally suffer this pain) closes through customer development rather than blocking the project.
 
 The decision to continue past end-of-week depends on Thursday's founder interviews. The decision criteria are in the "Decision Gate" section at the end of this doc.
@@ -108,6 +112,70 @@ Three structural reasons, not generic blockchain reasons.
 - PDAX as the primary anchor and verifier
 - IPFS or equivalent for actual document storage (content hash on-chain, document off-chain with the startup)
 - Any future SEP-12-compliant institution as a relying party without custom integration
+
+---
+
+## Regional Market Evidence (APAC)
+
+### Validated pain pattern across APAC
+
+Multiple credible sources independently quantify the commercial onboarding pain Dserve described:
+
+- **Deloitte (via Backbase):** commercial client onboarding takes over 16 weeks; banks invest $20,000 to $30,000 per client.
+- **McKinsey (via Dakota):** 43 to 64 days for corporate onboarding at traditional financial institutions.
+- **Statrys (Singapore, 2026):** traditional banks take 4 to 8 weeks for foreign-owned companies.
+- **fintech.global (2025):** KYB onboarding remains "heavily manual, often dragging on for days or even weeks."
+
+Industry voice articulates the SelyoPass thesis without naming it. From fintech.global, June 2025: "The challenge is magnified when the same client needs to be onboarded multiple times by different parties. Without a single source of truth, risk ratings drift out of date, audit trails remain incomplete, and assessments become inconsistent." The proposed solutions in that article are AI-driven KYB automation, not portable credentials. That is the gap SelyoPass fills.
+
+The pain is real, recognized, and quantified. The specific Dserve framing (UnionBank, Xendit, GCash, Google) is one country-shaped manifestation of a broader pattern.
+
+### Regulator-led precedents (out of scope)
+
+Two markets have built their own version of "verify once, share with regulated parties." SelyoPass should acknowledge both proactively before a judge raises them.
+
+- **Singapore Myinfo Business (GovTech).** Government-built. Pulls verified corporate data from official registries with consent. Integrated into 1,000+ digital services. New version rolling out in 2026. SelyoPass does not compete with Myinfo Business inside Singapore. Best play: ignore Singapore or interoperate with Myinfo Business as an upstream data source.
+- **India Account Aggregator framework / Sahamati (RBI-regulated).** Operational broadly since 2021. Razorpay, Setu, HyperVerge integrate. Solves a different but adjacent slice: financial data sharing (bank statements, credit, mutual funds, insurance) for individual and MSME credit. Not a KYB credential platform. Skip India.
+
+### Where SelyoPass has room: APAC ex-Singapore, possibly ex-India
+
+Each market below has the regulatory fragmentation pattern but no government-led portable credential infrastructure.
+
+- **Philippines (Phase 1).** BSP + SEC dual regulator. Documented Dserve-style pain. Anchor candidate exists in PDAX. Home market.
+- **Indonesia (Phase 2 candidate).** OJK + Bank Indonesia dual regulator. AsiaVerify documents severe fragmentation: company data is split across AHU Online (entity registration) and OSS (licensing), both primarily Bahasa-only. 64M MSMEs, 61% of GDP. Larger total market than the Philippines. Mirrors the Philippine BSP+SEC pattern at greater scale.
+- **Vietnam (Phase 3 candidate).** Documented compliance pain for foreign founders. Less specific KYB-shaped evidence than Indonesia. PDPL 2026 adds complexity. Worth interviewing founders before committing.
+- **Malaysia, Thailand.** Bank Negara and BoT respectively. Five new digital banks in Malaysia (2022) created fresh onboarding demand. Less urgent than Indonesia for sequencing purposes.
+
+### Cross-border ASEAN harmonization gap
+
+ASEAN-level KYB harmonization has been promised for years and not delivered. ASEAN's Inclusive Business Accreditation Framework is policy, not infrastructure. AsiaVerify launched "KYB Complete" in 2025 as the institution-side play across 14 Asian markets. The startup-side equivalent — a portable credential a business carries from Manila to Jakarta to Ho Chi Minh — does not exist in the visible competitive set.
+
+This is a real moat opportunity. Inter-government coordination on KYB harmonization moves on decade timelines. A startup-built, business-owned credential that crosses borders is structurally hard for any single regulator to displace because no single regulator owns it.
+
+### APAC RegTech market sizing
+
+- APAC RegTech market: $3.21B (2024), growing at 19.3% CAGR through 2029
+- APAC RegTech deal flow: $560M (2024), India dominated with 21% of deals
+- Global RegTech: $5.5B (Q1 to Q3 2025)
+
+Most APAC RegTech investment goes to institution-side tools (AsiaVerify, HyperVerge, Sumsub, Persona, Dotfile, Muinmos). The business-side credential lane is unfunded and unoccupied.
+
+### Existential threats
+
+- **Regulator action.** If BSP builds a Myinfo Business equivalent for the Philippines, SelyoPass collapses in the home market. The defense is moving fast enough that BSP treats SelyoPass as an interoperability partner rather than a redundant private solution. PDAX participation is the strategic hedge: a regulated anchor inside the Stellar ecosystem makes SelyoPass harder to displace.
+- **Incumbent expansion.** AsiaVerify, HyperVerge, or Sumsub could pivot into business-owned credentials. Their current revenue model (institutions pay per verification) makes this hard. Network effects compound faster than they can decide to cannibalize themselves.
+- **Stellar SEP-12 standardization stalls.** If SEP-12 KYB extensions never get formally adopted by the Stellar ecosystem, custom integration cost rises and the moat erodes. Engaging with the Stellar Development Foundation early matters.
+
+### Research gaps only customer development can close
+
+Web search is a weak instrument for first-person founder testimony in APAC. Reddit and HN are not where Philippine, Indonesian, or Vietnamese founders complain about onboarding pain. Country-specific Slack groups, LinkedIn, WhatsApp, and Telegram channels are. Thursday's founder interviews are the right tool for this gap, not more desk research.
+
+### Implications for SelyoPass strategy
+
+1. **Position against the regulator-led precedents.** Acknowledge Myinfo Business and Account Aggregator before a judge brings them up. Frame: "where the regulator builds it, we ignore that market; where they have not, we extend a published Stellar standard."
+2. **Frame APAC ex-Singapore-and-India as the actual market.** Indonesia is the Phase 2 prize, not Singapore.
+3. **Treat PDAX participation as existential, not nice-to-have.** It is also the regulatory hedge against a future BSP-led portable identity initiative.
+4. **Design credential format for cross-jurisdiction extensibility from day one.** Bahasa-language fields, OJK-compatible UBO schema, jurisdiction-tagged document hashes. Otherwise the Phase 2 expansion claim is hollow.
 
 ---
 
