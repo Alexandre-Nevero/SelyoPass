@@ -111,6 +111,14 @@ the document hashes and shows a per-check result.
 - **Testnet only. Synthetic data only.** No mainnet, no real corporate data or beneficial-owner PII
   (BR-006).
 
+### On-chain artifact (testnet)
+
+A real testnet transaction anchoring a demo credential hash:
+
+- **Interaction tx hash:** [`3ec971accbb9b788fee6d4c2ac142b022c6abd6ea21667777fdd12a54e58c350`](https://stellar.expert/explorer/testnet/tx/3ec971accbb9b788fee6d4c2ac142b022c6abd6ea21667777fdd12a54e58c350)
+- **Anchoring account:** [`GBGGWBUTTJCQAQRF6DI3T4WKPSVWHZMWGAAKBWHNOG6BEKJMQD3PQXLT`](https://stellar.expert/explorer/testnet/account/GBGGWBUTTJCQAQRF6DI3T4WKPSVWHZMWGAAKBWHNOG6BEKJMQD3PQXLT)
+- **Data entry:** `selyopass:selyo-demo-level3` → 32-byte SHA-256 credential fingerprint
+
 See [`docs/`](./docs) for the full PRD, system design, data model, QA plan, and security/compliance
 analysis.
 
