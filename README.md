@@ -10,7 +10,7 @@ Early-stage Philippine startups face fragmented and repetitive KYB onboarding wh
 
 SelyoPass lets a startup get verified once by a regulated Stellar anchor and present a signed, structured, independently verifiable credential to every future bank, payment partner, or marketplace. Institutions skip the document collection step and complete their compliance work faster while keeping full decision authority. **SelyoPass is a secure data courier, not a compliance stamp** — it removes the document collection step, never the institution's compliance judgment.
 
-This branch is the **Stellar Level 3 + APAC submission MVP**: the full issue → anchor → verify credential loop on Stellar testnet.
+This branch is the **Stellar Level 3**: the full issue → anchor → verify credential loop on Stellar testnet.
 
 **Live demo:** [https://selyo-pass.vercel.app](https://selyo-pass.vercel.app)
 
