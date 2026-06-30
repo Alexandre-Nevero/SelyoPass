@@ -332,3 +332,234 @@ h1 {
     font-size: 1.4rem;
   }
 }
+
+/* ─── Level 3 MVP: shell, tabs, views ────────────────────────── */
+.app-shell {
+  max-width: 640px;
+}
+
+.header-sub {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.6rem 0.9rem;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tab.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: var(--color-accent-light);
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-hint {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 1.25rem 0 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eef0f3;
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: var(--radius-sm);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  resize: vertical;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(27, 58, 92, 0.1);
+}
+
+.owner-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.owner-row input[type='text'] {
+  flex: 1;
+}
+
+.owner-row input[type='number'] {
+  width: 80px;
+}
+
+.owner-row input {
+  padding: 0.6rem 0.7rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 0.9rem;
+}
+
+.field-error {
+  display: block;
+  color: var(--color-error);
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+
+.field-ok {
+  display: block;
+  color: #15803d;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  word-break: break-all;
+}
+
+.field-note {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+.btn-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+}
+
+.mono-small {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  word-break: break-all;
+}
+
+.cred-json {
+  margin-top: 0.75rem;
+}
+
+.cred-json summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.cred-json pre {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  overflow-x: auto;
+  max-height: 320px;
+}
+
+.anchor-result {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed #a7f3d0;
+}
+
+/* Verification result */
+.status-card.reject {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.verdict {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.75rem;
+  color: var(--color-primary);
+}
+
+.status-card.reject .verdict {
+  color: var(--color-error);
+}
+
+.checklist {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.checklist li {
+  font-size: 0.88rem;
+  padding-left: 1.4rem;
+  position: relative;
+}
+
+.checklist li::before {
+  position: absolute;
+  left: 0;
+}
+
+.checklist li.ok::before { content: '✓'; color: #15803d; }
+.checklist li.bad::before { content: '✕'; color: var(--color-error); }
+.checklist li.warn::before { content: '!'; color: var(--color-accent); font-weight: 800; }
+
+.disclaimer {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  color: #92400e;
+}
+
+.footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* ─── Responsive (≤600px, idea.md design language) ───────────── */
+@media (max-width: 600px) {
+  .btn-row { flex-direction: column; }
+  .btn-row .btn { width: 100%; }
+  .tabs { flex-direction: column; }
+  .owner-row { flex-wrap: wrap; }
+}

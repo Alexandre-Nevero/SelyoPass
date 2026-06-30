@@ -8,85 +8,119 @@ SelyoPass is a portable Know Your Business (KYB) credential platform built on th
 
 Early-stage Philippine startups face fragmented and repetitive KYB onboarding when integrating with banks, payment gateways, and other regulated financial institutions. Every institution requires nearly identical business documents — SEC registration, BIR certificate, Mayor's Permit, Articles of Incorporation, beneficial ownership disclosure — and each runs an independent intake cycle even though they are verifying the same legal entity. The result is weeks of compounded delay before each integration goes live.
 
-SelyoPass lets a startup verify its corporate identity once with a regulated Stellar anchor (initially PDAX), and present that signed, structured credential to every future bank, payment partner, or marketplace. Institutions skip the document collection step and complete their compliance work faster while keeping full decision authority. SelyoPass eliminates document collection, not compliance judgment.
+SelyoPass lets a startup get verified once by a regulated Stellar anchor and present a signed, structured, independently verifiable credential to every future bank, payment partner, or marketplace. Institutions skip the document collection step and complete their compliance work faster while keeping full decision authority. **SelyoPass is a secure data courier, not a compliance stamp** — it removes the document collection step, never the institution's compliance judgment.
 
-This repository is the Stellar Level 1 White Belt submission, which demonstrates the foundational on-chain mechanics. The full credential issuance and verification flow is on the roadmap toward Stellar Level 3 and the APAC Hackathon submission.
+This branch is the **Stellar Level 3 + APAC submission MVP**: the full issue → anchor → verify credential loop on Stellar testnet.
 
-### Core Capabilities (Level 1 – White Belt)
+### MVP capabilities
 
-- **Wallet Connection** – Connect and disconnect a Freighter wallet on Stellar Testnet
-- **Balance Display** – Fetch and display the connected wallet's native XLM balance
-- **Transaction Flow** – Build, sign, and submit an XLM payment transaction on testnet
-- **Transaction Feedback** – Show success/failure states with transaction hash and Stellar Expert link
+| ID | Capability |
+|----|-----------|
+| **F-001** | SEP-12-extended KYB credential schema for PH business documents (SEC, BIR, Mayor's Permit, Articles of Incorporation, GIS) + beneficial-ownership (UBO) fields |
+| **F-002** | Anchor-issued, **ed25519-signed** credential; the credential **hash is anchored on Stellar testnet** |
+| **F-003** | Documents are **hashed locally** (SHA-256) — only the hash is recorded; SelyoPass never stores documents |
+| **F-004** | Relying-party reader: verifies the anchor signature and re-checks document hashes |
+| **F-005** | Mobile-responsive issuance + verification views |
+| **F-006** | Error and loading states across wallet connect, issuance, and verification |
+
+### How it works
+
+1. **Issue (startup).** Fill the KYB form and attach documents. Each document is hashed in your
+   browser. The simulated anchor signs the credential (ed25519). You can download the credential
+   JSON and anchor its hash on Stellar testnet via Freighter.
+2. **Anchor (on-chain).** A single `manageData` transaction records **only** the 32-byte credential
+   fingerprint on testnet — never documents or personal data. You get a transaction hash.
+3. **Verify (relying party).** Paste the credential, present the documents again, and the reader
+   verifies the anchor's signature and that every presented document still matches its anchored
+   hash. The result states what was cryptographically verified — not a "trust-this-business" stamp.
 
 ---
+
+## Everything here is free
+
+No paid APIs, no freemium, no hosted services:
+
+- **Stellar testnet** + **Friendbot** — free
+- **Freighter** wallet — free
+- **SHA-256** via the browser's built-in Web Crypto API — no library, no service
+- **ed25519** signing/verification via `@stellar/stellar-sdk` — free
+- **Vitest** (tests) and **GitHub Actions** (CI) — free / open source
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 18 + Vite |
-| Blockchain | Stellar Testnet |
-| Wallet | Freighter Browser Extension |
-| SDK | `@stellar/stellar-sdk`, `@stellar/freighter-api` |
+| Frontend | React 18 + Vite 5 |
+| Blockchain | Stellar Testnet (`@stellar/stellar-sdk`) |
+| Wallet | Freighter (`@stellar/freighter-api`) |
+| Hashing | Web Crypto API (SHA-256) |
+| Signing | ed25519 (Stellar keypair) |
+| Tests / CI | Vitest / GitHub Actions |
 
 ---
 
-## Setup Instructions
+## Setup
 
 ### Prerequisites
 
-- **Node.js** v18 or higher
-- **npm** or **yarn**
-- **Freighter Wallet** browser extension ([Install here](https://www.freighter.app/))
-- A funded Stellar **Testnet** account (use [Friendbot](https://friendbot.stellar.org/) to fund)
+- **Node.js** v18+ and **npm**
+- **Freighter** browser extension ([install](https://www.freighter.app/)), set to **Testnet**
+- A funded testnet account ([Friendbot](https://friendbot.stellar.org/)) — needed only to anchor on-chain
 
-### Installation
+### Install & run
 
 ```bash
-# Clone the repository
 git clone https://github.com/Alexandre-Nevero/SelyoPass.git
 cd SelyoPass
-
-# Install dependencies
 npm install
-
-# Start the development server
-npm run dev
+npm run dev        # http://localhost:5173
 ```
 
-The app will be available at `http://localhost:5173`.
+### Test & build
 
-### Freighter Setup
-
-1. Install the Freighter browser extension.
-2. Create or import a wallet.
-3. Switch to **Testnet** in Freighter settings (Settings → Network → Testnet).
-4. Fund your testnet wallet via [Friendbot](https://friendbot.stellar.org/?addr=YOUR_PUBLIC_KEY).
+```bash
+npm run test:run   # run the unit test suite once
+npm test           # watch mode
+npm run build      # production build → dist/
+```
 
 ---
 
 ## Usage
 
-1. Open the app and click **"Connect Freighter Wallet"**.
-2. Approve the connection in the Freighter popup.
-3. Your XLM balance will display automatically.
-4. Fill in the corporate identity form (Company Name, SEC Number).
-5. Click **"Submit Profile & Send XLM"** to create the on-chain transaction.
-6. Approve the transaction in Freighter.
-7. View the transaction result and click the link to see it on Stellar Expert.
+**Issue a credential (startup):** open the **Issue** tab, fill the company + UBO fields, attach the
+five documents (hashed locally), and click **Issue Credential**. Download the JSON, then optionally
+**Connect Freighter** and **Anchor hash on Stellar testnet** for an on-chain record + tx hash.
+
+**Verify a credential (relying party):** open the **Verify** tab, load/paste the credential JSON,
+present the documents, and click **Verify Credential**. The reader checks the anchor signature and
+the document hashes and shows a per-check result.
 
 ---
 
-## Screenshots for Submission
+## Important notes (scope & honesty)
 
-- **Wallet Connected & Balance Displayed** – Shows the connected wallet address and XLM balance
+- **The anchor is simulated.** For the MVP the regulated anchor (e.g. PDAX) is simulated by a
+  throwaway **testnet** keypair (see `src/lib/anchorIdentity.js`). Signature/issuance tests prove the
+  mechanism against a synthetic issuer — not that a real regulated anchor participates. Real
+  issuer-key custody is an open question (see `docs/12-security-compliance.md`).
+- **On-chain anchoring uses a classic `manageData` transaction, not a Soroban contract (yet).** The
+  docs target a Soroban smart contract for F-002; the on-chain layer is isolated in
+  `src/lib/onchain.js` so a Soroban contract can replace it without touching the rest. The
+  credential's trust (the ed25519 anchor signature) is unchanged either way.
+- **Testnet only. Synthetic data only.** No mainnet, no real corporate data or beneficial-owner PII
+  (BR-006).
 
-  ![Wallet Connected](./screenshots/wallet-connected-displayed.png)
+### On-chain artifact (testnet)
 
-- **Successful Transaction & Result** – Transaction submitted successfully with confirmation on Stellar Expert
+A real testnet transaction anchoring a demo credential hash:
 
-  ![Transaction Success](./screenshots/transaction-success-results.png)
+- **Interaction tx hash:** [`3ec971accbb9b788fee6d4c2ac142b022c6abd6ea21667777fdd12a54e58c350`](https://stellar.expert/explorer/testnet/tx/3ec971accbb9b788fee6d4c2ac142b022c6abd6ea21667777fdd12a54e58c350)
+- **Anchoring account:** [`GBGGWBUTTJCQAQRF6DI3T4WKPSVWHZMWGAAKBWHNOG6BEKJMQD3PQXLT`](https://stellar.expert/explorer/testnet/account/GBGGWBUTTJCQAQRF6DI3T4WKPSVWHZMWGAAKBWHNOG6BEKJMQD3PQXLT)
+- **Data entry:** `selyopass:selyo-demo-level3` → 32-byte SHA-256 credential fingerprint
+
+See [`docs/`](./docs) for the full PRD, system design, data model, QA plan, and security/compliance
+analysis.
 
 ---
 
@@ -94,13 +128,29 @@ The app will be available at `http://localhost:5173`.
 
 ```
 SelyoPass/
+├── .github/workflows/ci.yml      # free CI: test + build
+├── docs/                         # PRD, system design, data model, QA, security
 ├── index.html
 ├── package.json
 ├── vite.config.js
+├── vitest.config.js
 ├── src/
 │   ├── main.jsx
-│   ├── App.jsx        # Main application logic
-│   └── App.css        # Styling
+│   ├── App.jsx                   # shell: connect + Issue/Verify tabs
+│   ├── App.css
+│   ├── components/
+│   │   ├── IssuerView.jsx        # F-001/F-002/F-003 issuance
+│   │   └── ReaderView.jsx        # F-004 verification
+│   └── lib/
+│       ├── schema.js             # F-001 KYB schema + validation
+│       ├── hash.js               # F-003 SHA-256 (Web Crypto)
+│       ├── canonical.js          # deterministic serialization
+│       ├── credential.js         # F-002/F-004 sign + verify (ed25519)
+│       ├── onchain.js            # F-002 on-chain hash anchoring (BR-002)
+│       ├── anchorIdentity.js     # simulated testnet anchor
+│       ├── wallet.js             # Freighter wrapper
+│       ├── stellar.js            # testnet config
+│       └── __tests__/            # Vitest unit tests
 └── README.md
 ```
 
@@ -108,4 +158,4 @@ SelyoPass/
 
 ## License
 
-This project is open source under the terms specified in the [LICENSE](./LICENSE) file.
+Open source under the [LICENSE](./LICENSE) file.
