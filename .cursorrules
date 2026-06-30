@@ -1,0 +1,14 @@
+# SelyoPass — Cursor rules
+
+Read AGENTS.md at the project root for the full agent guide (overview, architecture, build/test,
+conventions, and /docs references). Ground every change in idea.md + /docs, not memory.
+
+Load-bearing rules to never break:
+- Never put document bytes or PII on-chain — only the document hash (BR-002, non-custodial).
+- Never present a "verified / trust-this-business" compliance stamp; SelyoPass is a data courier,
+  and compliance liability stays with the relying institution (BR-003, BSP Circular 1170).
+- Never handle the user's private key — signing is Freighter's job; never hardcode an issuer key.
+- Testnet only, Freighter only, Philippines only for the MVP (idea.md §10).
+- Every code change ties to an F-### that has a test in docs/11-qa-test-plan.md.
+
+For scoped, path-specific rules, see ./.cursor/rules/*.mdc (none generated for this MVP).

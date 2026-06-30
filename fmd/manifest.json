@@ -1,0 +1,65 @@
+{
+  "name": "fmd",
+  "description": "Foundational Matrix Documents — the factory. Turns a finished, frozen idea.md into a /docs set. Authoring idea.md (the forge) lives in the idea-kit, upstream and external.",
+  "version": "2.0.0",
+  "entrypoint": "agents/ORCHESTRATOR.md",
+  "inputContract": { "id": "idea", "path": "templates/idea.md", "note": "FMD starts at a finished idea.md matching this template. It does not author the brief." },
+  "process": [
+    { "id": "overview", "path": "00-process/overview.md", "purpose": "Five-stage pipeline; marks the forge/factory boundary." },
+    { "id": "docs-generation", "path": "00-process/docs-generation.md", "purpose": "Pipeline diagram + the generator-verifier QA loop." }
+  ],
+  "templates": [
+    { "id": "idea", "path": "templates/idea.md", "role": "input-brief", "schemaVersion": "1.1.0", "generated": false, "mvp": true, "dependsOn": [], "producedBy": "idea-kit", "verifiedBy": ["validator"], "idScheme": ["F-###"] },
+    { "id": "brd", "path": "templates/01-brd.md", "category": "why", "generated": true, "mvp": false, "dependsOn": ["idea"], "producedBy": "orchestrator", "verifiedBy": ["qa-anti-hallucination", "consistency-checker", "humanizer"] },
+    { "id": "mrd", "path": "templates/02-mrd.md", "category": "market", "generated": true, "mvp": false, "dependsOn": ["idea", "brd"], "producedBy": "orchestrator", "verifiedBy": ["qa-anti-hallucination", "consistency-checker", "humanizer"] },
+    { "id": "prd", "path": "templates/03-prd.md", "category": "what", "generated": true, "mvp": true, "dependsOn": ["idea", "brd", "mrd"], "producedBy": "orchestrator", "verifiedBy": ["qa-anti-hallucination", "consistency-checker", "humanizer"], "idScheme": ["F-###", "UJ-###", "BR-###"] },
+    { "id": "frd", "path": "templates/04-frd.md", "category": "what", "generated": true, "mvp": false, "dependsOn": ["prd"], "producedBy": "orchestrator", "verifiedBy": ["qa-anti-hallucination", "consistency-checker"], "idScheme": ["F-###", "BR-###"] },
+    { "id": "srs", "path": "templates/05-srs.md", "category": "what", "generated": true, "mvp": false, "dependsOn": ["prd", "frd"], "producedBy": "orchestrator", "verifiedBy": ["qa-anti-hallucination", "consistency-checker"] },
+    { "id": "system-design", "path": "templates/06-system-design.md", "category": "how", "generated": true, "mvp": true, "dependsOn": ["prd"], "producedBy": "architect", "verifiedBy": ["qa-anti-hallucination", "consistency-checker"] },
+    { "id": "technical-design", "path": "templates/07-technical-design.md", "category": "how", "generated": true, "mvp": false, "dependsOn": ["system-design"], "producedBy": "architect", "verifiedBy": ["qa-anti-hallucination", "consistency-checker"] },
+    { "id": "api-spec", "path": "templates/08-api-spec.md", "category": "how", "generated": true, "mvp": false, "dependsOn": ["system-design", "technical-design"], "producedBy": "architect", "verifiedBy": ["qa-anti-hallucination", "consistency-checker"], "idScheme": ["API-###"] },
+    { "id": "data-model", "path": "templates/09-data-model.md", "category": "how", "generated": true, "mvp": true, "dependsOn": ["system-design"], "producedBy": "architect", "verifiedBy": ["qa-anti-hallucination", "consistency-checker"] },
+    { "id": "design-system", "path": "templates/10-design-system.md", "category": "cross-cutting", "generated": true, "mvp": false, "dependsOn": ["prd"], "producedBy": "orchestrator", "verifiedBy": ["qa-anti-hallucination", "consistency-checker", "humanizer"] },
+    { "id": "qa-test-plan", "path": "templates/11-qa-test-plan.md", "category": "qa", "generated": true, "mvp": true, "dependsOn": ["prd", "frd", "system-design"], "producedBy": "orchestrator", "verifiedBy": ["consistency-checker", "qa-anti-hallucination"], "idScheme": ["F-###", "BR-###", "API-###"] },
+    { "id": "security-compliance", "path": "templates/12-security-compliance.md", "category": "cross-cutting", "generated": true, "mvp": false, "condition": "any network-exposed surface", "dependsOn": ["system-design", "data-model"], "producedBy": "architect", "verifiedBy": ["qa-anti-hallucination", "consistency-checker"] },
+    { "id": "release-gtm", "path": "templates/13-release-gtm.md", "category": "release", "generated": true, "mvp": false, "dependsOn": ["prd", "mrd"], "producedBy": "orchestrator", "verifiedBy": ["qa-anti-hallucination", "consistency-checker", "humanizer"] },
+    { "id": "adr", "path": "templates/_adr.md", "category": "decision-log", "generated": false, "mvp": false, "dependsOn": [], "producedBy": "orchestrator-append", "verifiedBy": [] }
+  ],
+  "mvpDocSet": ["idea", "prd", "system-design", "data-model", "qa-test-plan"],
+  "mvpConditional": ["security-compliance"],
+  "playbooks": [
+    { "id": "mvp-vs-final-scoping", "path": "playbooks/mvp-vs-final-scoping.md", "purpose": "Which docs each stage needs." },
+    { "id": "doc-review-checklist", "path": "playbooks/doc-review-checklist.md", "purpose": "The review gate." }
+  ],
+  "agents": [
+    { "id": "orchestrator", "path": "agents/ORCHESTRATOR.md", "audience": "factory-operator", "purpose": "How to run the factory. Read first. Never emitted." },
+    { "id": "agents-readme", "path": "agents/README.md", "audience": "factory-operator", "purpose": "Explains the two audiences." },
+    { "id": "product-agents-template", "path": "agents/product/AGENTS.template.md", "audience": "emitted-to-product", "purpose": "Filled and emitted to the target project root as AGENTS.md." },
+    { "id": "product-claude", "path": "agents/product/CLAUDE.md", "audience": "emitted-to-product", "purpose": "Pointer to AGENTS.md." },
+    { "id": "product-cursorrules", "path": "agents/product/.cursorrules", "audience": "emitted-to-product", "purpose": "Pointer to AGENTS.md + scoped rules." },
+    { "id": "product-cursor-rule-example", "path": "agents/product/cursor-rules/example.mdc", "audience": "emitted-to-product", "purpose": "Scoped *.mdc rule template (globs + frontmatter)." }
+  ],
+  "subagents": [
+    { "id": "validator", "path": "subagents/validator.md", "role": "input-firewall", "tools": ["read"] },
+    { "id": "architect", "path": "subagents/architect.md", "role": "generator", "tools": ["read", "write"] },
+    { "id": "qa-anti-hallucination", "path": "subagents/qa-anti-hallucination.md", "role": "verifier", "tools": ["read"] },
+    { "id": "consistency-checker", "path": "subagents/consistency-checker.md", "role": "verifier", "tools": ["read"] },
+    { "id": "humanizer", "path": "subagents/humanizer.md", "role": "verifier", "tools": ["read", "write"] },
+    { "id": "red-team", "path": "subagents/red-team.md", "role": "optional-adversarial-verifier", "tools": ["read"] }
+  ],
+  "qaLoop": {
+    "order": ["qa-anti-hallucination", "consistency-checker", "humanizer"],
+    "maxIterationsPerDoc": 3,
+    "onExhausted": "escalate-to-human",
+    "humanizerRunsLast": true
+  },
+  "forge": {
+    "name": "idea-kit",
+    "location": "separate repo (your knowledge base) — not part of FMD",
+    "produces": "the frozen idea.md that FMD consumes",
+    "note": "Authoring (problem validation, market research, interviews, the researcher subagent, the idea.md how-to) lives entirely in the forge. FMD keeps only templates/idea.md (input contract) + the validator (firewall)."
+  },
+  "examples": [
+    { "id": "sample-recon-ai", "path": "examples/sample-recon-ai/", "domain": "fintech / AI / data", "purpose": "One complete worked reference: frozen idea.md -> full MVP /docs set -> emitted product AGENTS.md." }
+  ]
+}
