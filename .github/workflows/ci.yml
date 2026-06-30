@@ -1,7 +1,5 @@
 name: CI
 
-# Free CI on GitHub Actions (no paid services). Runs the unit tests and the
-# production build on every push and pull request.
 on:
   push:
     branches: ['**']
@@ -14,14 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run tests
         run: npm run test:run
