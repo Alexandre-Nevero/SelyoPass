@@ -34,7 +34,7 @@ jobs:
         run: npm run test:run
 
       - name: Build
-        run: npm run build
+        run: VITE_BASE_PATH=/SelyoPass/ npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
