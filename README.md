@@ -12,6 +12,10 @@ SelyoPass lets a startup get verified once by a regulated Stellar anchor and pre
 
 This branch is the **Stellar Level 3 + APAC submission MVP**: the full issue → anchor → verify credential loop on Stellar testnet.
 
+**Live demo:** [https://selyo-pass.vercel.app](https://selyo-pass.vercel.app)
+
+**Demo video:** [https://www.loom.com/share/032a6732310c48e0afc5cc8d71b96ad7](https://www.loom.com/share/032a6732310c48e0afc5cc8d71b96ad7)
+
 ### MVP capabilities
 
 | ID | Capability |
