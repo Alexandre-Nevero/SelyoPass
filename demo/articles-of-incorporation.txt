@@ -1,0 +1,38 @@
+═══════════════════════════════════════════════════════════════
+           ARTICLES OF INCORPORATION
+═══════════════════════════════════════════════════════════════
+
+ARTICLE I — NAME
+  The name of the corporation shall be DSERVE TECHNOLOGIES INC.
+
+ARTICLE II — PURPOSE
+  To engage in information technology services, software
+  development, and digital marketplace operations.
+
+ARTICLE III — PRINCIPAL OFFICE
+  Unit 501, Tech Hub Building, 123 Innovation Street,
+  Quezon City, Metro Manila, Philippines.
+
+ARTICLE IV — TERM
+  The corporation shall exist for a period of fifty (50) years
+  from the date of issuance of the certificate of incorporation.
+
+ARTICLE V — INCORPORATORS AND SUBSCRIBERS
+
+  Name                 Nationality   Shares    Amount (PHP)
+  ─────────────────────────────────────────────────────────
+  Juan Dela Cruz       Filipino      600       150,000.00
+  Maria Santos         Filipino      400       100,000.00
+
+ARTICLE VI — DIRECTORS
+  The affairs of the corporation shall be managed by a Board
+  of Directors of not fewer than five (5) nor more than
+  fifteen (15) members.
+
+  Initial Directors:
+  1. Juan Dela Cruz (Chairman)
+  2. Maria Santos
+
+═══════════════════════════════════════════════════════════════
+⚠️  THIS IS A SYNTHETIC DEMO DOCUMENT — NOT REAL ARTICLES
+═══════════════════════════════════════════════════════════════
