@@ -1,0 +1,8 @@
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/release/deps/serde_with_macros-9ea1ef3def9f7a1c.d: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/apply.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/lazy_bool.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/utils.rs
+
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/release/deps/libserde_with_macros-9ea1ef3def9f7a1c.dylib: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/apply.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/lazy_bool.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/utils.rs
+
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/lib.rs:
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/apply.rs:
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/lazy_bool.rs:
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.21.0/src/utils.rs:

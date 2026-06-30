@@ -1,0 +1,9 @@
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/debug/deps/num_integer-bbae1f82473fdd3d.d: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/roots.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/average.rs
+
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/debug/deps/libnum_integer-bbae1f82473fdd3d.rlib: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/roots.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/average.rs
+
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/debug/deps/libnum_integer-bbae1f82473fdd3d.rmeta: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/roots.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/average.rs
+
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/lib.rs:
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/roots.rs:
+/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/num-integer-0.1.46/src/average.rs:

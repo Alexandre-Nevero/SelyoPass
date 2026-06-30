@@ -1,0 +1,1 @@
+/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/wasm32v1-none/release/selyopass_credential.wasm: /Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/src/lib.rs

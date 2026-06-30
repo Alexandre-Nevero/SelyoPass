@@ -27,6 +27,18 @@ NETWORK="testnet"
 CONTRACT_DIR="selyopass-credential"
 WASM_PATH="${CONTRACT_DIR}/target/wasm32-unknown-unknown/release/selyopass_credential.wasm"
 
+# Detect CLI name (newer versions = "stellar", older/brew = "soroban")
+if command -v stellar &>/dev/null; then
+  CLI="stellar"
+elif command -v soroban &>/dev/null; then
+  CLI="soroban"
+else
+  echo "ERROR: neither 'stellar' nor 'soroban' CLI found in PATH."
+  echo "Install: brew install stellar/tap/soroban-cli"
+  exit 1
+fi
+echo "  Using CLI: $CLI ($(${CLI} --version))"
+
 # Synthetic demo fingerprint (32 bytes as hex — same one used in the JS tests)
 DEMO_CRED_ID="selyo-soroban-demo-001"
 DEMO_FINGERPRINT="bd08300831fb6185b95a7cd1ab8c28ea968cd2b9f44b518aa8793fec7fcc27e5"
@@ -37,14 +49,14 @@ echo ""
 # ── Step 1: Build ──
 echo "► Building contract..."
 cd "$CONTRACT_DIR"
-stellar contract build
+${CLI} contract build
 cd ..
 echo "  ✓ Built: $WASM_PATH"
 echo ""
 
 # ── Step 2: Deploy ──
 echo "► Deploying to $NETWORK..."
-CONTRACT_ID=$(stellar contract deploy \
+CONTRACT_ID=$(${CLI} contract deploy \
   --wasm "$WASM_PATH" \
   --network "$NETWORK" \
   --source "$IDENTITY")
@@ -54,7 +66,7 @@ echo ""
 
 # ── Step 3: Invoke issue() ──
 echo "► Invoking issue() with synthetic data (BR-006)..."
-ISSUE_RESULT=$(stellar contract invoke \
+ISSUE_RESULT=$(${CLI} contract invoke \
   --id "$CONTRACT_ID" \
   --network "$NETWORK" \
   --source "$IDENTITY" \
@@ -68,7 +80,7 @@ echo ""
 
 # ── Step 4: Invoke read() ──
 echo "► Invoking read() to verify..."
-READ_RESULT=$(stellar contract invoke \
+READ_RESULT=$(${CLI} contract invoke \
   --id "$CONTRACT_ID" \
   --network "$NETWORK" \
   --source "$IDENTITY" \
