@@ -7,3 +7,7 @@ ltm/runtime/*
 ltm/reports/*
 ltm/snapshots/*
 # --- /ltm-power ---
+
+# Rust build artifacts
+contracts/*/target/
+dist/

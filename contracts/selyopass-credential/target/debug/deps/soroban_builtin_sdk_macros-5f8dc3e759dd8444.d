@@ -1,7 +1,0 @@
-/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/debug/deps/soroban_builtin_sdk_macros-5f8dc3e759dd8444.d: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/derive_fn.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/derive_type.rs
-
-/Users/alexandreandreinevero/Documents/SelyoPass/SelyoPass/contracts/selyopass-credential/target/debug/deps/libsoroban_builtin_sdk_macros-5f8dc3e759dd8444.dylib: /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/lib.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/derive_fn.rs /Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/derive_type.rs
-
-/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/lib.rs:
-/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/derive_fn.rs:
-/Users/alexandreandreinevero/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/soroban-builtin-sdk-macros-21.2.1/src/derive_type.rs:
