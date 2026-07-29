@@ -117,9 +117,9 @@ The LTM store was reviewed end-to-end. It contains **no behavioral evidence** �
 
 | ID | Item | Source | Date | Status |
 |----|------|--------|------|--------|
-| E-060 | Bootstrap checkpoint: "SelyoPass is a portable KYB credential platform on Stellar; Level 1 White Belt mechanics shipped, building toward Level 3 + APAC submission June 30." | ltm/store/checkpoints.jsonl `chk_000001` | 2026-06-28 | ✅ VERIFIED (internal state) |
-| E-061 | Level 1 testnet mechanics shipped: Freighter connect/disconnect, XLM balance fetch, build/sign/submit testnet tx, success/failure with tx hash. | project-context.md (Level 1 status table) | — | ✅ VERIFIED (internal state) |
-| — | Events log = structural file-write records only; sessions = no substantive summaries; open_threads = empty. No customer or market evidence in memory. | ltm/store/* | 2026-06-24→30 | ✅ VERIFIED (absence noted) |
+| E-060 | A prior ledger cited bootstrap checkpoint `chk_000001`, but the referenced `ltm/store/checkpoints.jsonl` is not present in this checkout. | missing historical source | 2026-06-28 | ⚠️ UNVERIFIED — do not cite as current proof |
+| E-061 | Historical Level 1 notes describe Freighter/Horizon transaction mechanics. They do not prove the current two-contract recovery build. | `.kiro/steering/project-context.md` (historical snapshot) | — | 🟡 HISTORICAL — superseded for current-state claims |
+| — | The checked-in `ltm/` directory contains tooling/config only, not a project-state evidence store. | `ltm/` inspection | 2026-07-29 | ✅ VERIFIED (absence noted) |
 
 ---
 

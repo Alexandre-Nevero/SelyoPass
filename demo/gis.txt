@@ -2,32 +2,32 @@
     GENERAL INFORMATION SHEET (GIS) — SEC ANNUAL FILING
 ═══════════════════════════════════════════════════════════════
 
-Company: DSERVE TECHNOLOGIES INC.
-SEC Registration No.: CS202412345
+Company: KATHA LEDGER LABS INC.
+SEC Registration No.: CS000000000
 Fiscal Year End: December 31
 Date Filed: January 15, 2025
 
 CORPORATE INFORMATION
-  Principal Office: Unit 501, Tech Hub Building, Quezon City
-  Telephone: +63 2 8888 0001
-  Email: info@dserve-demo.ph
+  Principal Office: Unit 0, Synthetic Test Building, Fiction City
+  Telephone: +63 2 0000 0000
+  Email: demo@example.invalid
   Industry: IT and Business Process Management
 
 BENEFICIAL OWNERSHIP DISCLOSURE (SEC MC No. 15, s.2025)
   ┌────────────────────┬─────────────┬───────────┐
   │ Name               │ Nationality │ % Owned   │
   ├────────────────────┼─────────────┼───────────┤
-  │ Juan Dela Cruz     │ Filipino    │ 60%       │
-  │ Maria Santos       │ Filipino    │ 40%       │
+  │ Founder Alpha      │ Filipino    │ 60%       │
+  │ Founder Beta       │ Filipino    │ 40%       │
   └────────────────────┴─────────────┴───────────┘
 
   No beneficial owner holds shares through intermediaries.
   No foreign beneficial owner.
 
 DIRECTORS & OFFICERS
-  Chairman / President: Juan Dela Cruz
-  Treasurer: Maria Santos
-  Corporate Secretary: Ana Reyes (synthetic)
+  Chair / President: Founder Alpha
+  Treasurer: Founder Beta
+  Corporate Secretary: Officer Gamma
 
 ═══════════════════════════════════════════════════════════════
 ⚠️  THIS IS A SYNTHETIC DEMO DOCUMENT — NOT A REAL GIS FILING

@@ -1,52 +1,27 @@
-# Demo Materials
+# Synthetic Demo Materials
 
-These are **synthetic** files for demonstrating SelyoPass. They contain no real
-corporate data, no real beneficial-owner PII, and no real document content
-(BR-006 / TC-017). Use them when recording the demo video or presenting live.
+These files are synthetic test fixtures. They contain no real corporate data or real beneficial-owner PII. Use them only on Stellar Testnet.
 
-## Form data to enter
+## Current release demo
 
-| Field | Value to type |
-|-------|---------------|
-| Registered company name | Dserve Technologies Inc. |
-| SEC registration number | CS202412345 |
-| Date of registration | 2024-03-15 |
-| Director name | Juan Dela Cruz |
-| Shareholder name | Maria Santos |
+The release-bound demo must use the contract IDs and hashes in `deployments/testnet.json` and the evidence tied to the same release SHA in `submission/evidence.json`. If either manifest is still a draft, do not present the flow as deployed.
 
-## Beneficial owners (UBO)
+1. Open `#/prepare`.
+2. Explain that selected files stay local and only hashes enter the public request.
+3. Enter a synthetic organization label and a credential ID.
+4. Enter a ledger later than the current Testnet ledger.
+5. Upload one or more files from this directory.
+6. Review the wallet subject, credential ID hash, document root, schema hash, and expiry.
+7. Connect Freighter or Albedo and request the credential.
+8. Show the confirmed transaction receipt and Explorer link.
+9. Open the explicitly labelled `#/anchor` simulated-anchor console.
+10. Connect the pre-authorized simulated-anchor wallet and issue the same credential ID.
+11. Show the Anchor Registry authorization result, issuance transaction, and contract event.
+12. Download or retain the local presentation package.
+13. Open `#/verify` without a wallet, load the package, and re-upload the same local files.
+14. Run integrity checks and explain each evidence row independently.
+15. Point to: “Your institution still makes its own KYB decision.”
 
-| Name | Ownership % |
-|------|-------------|
-| Juan Dela Cruz | 60 |
-| Maria Santos | 40 |
+For a negative check, substitute `bir-certificate-TAMPERED.txt` for `bir-certificate.txt`; the local document-root check must fail without changing the independent chain checks.
 
-## Documents to upload
-
-Upload each file from this `demo/` folder:
-
-| Document type | File to upload |
-|---------------|----------------|
-| SEC Registration | `sec-registration.txt` |
-| BIR Certificate | `bir-certificate.txt` |
-| Mayor's Permit | `mayors-permit.txt` |
-| Articles of Incorporation | `articles-of-incorporation.txt` |
-| General Information Sheet (GIS) | `gis.txt` |
-
-## Demo flow (for the video)
-
-1. Open the app → show the landing page (SelyoPass branding)
-2. Click **Connect Freighter** → approve in the popup
-3. Fill the form with the data above
-4. Upload the 5 files from this folder
-5. Click **Issue Credential** → show it signs instantly
-6. Click **Download credential JSON** → save the file
-7. Click **Anchor hash on Stellar testnet** → approve in Freighter → show tx link
-8. Switch to the **Verify** tab
-9. Load the downloaded credential JSON
-10. Re-upload the same 5 files as "presented documents"
-11. Click **Verify Credential** → show the green "VERIFIED TRANSMISSION" result
-12. Point out the disclaimer: "not a compliance stamp"
-13. (Optional) Tamper demo: change one file, re-verify → show the hash mismatch rejection
-
-Total time: ~90 seconds if you move quickly.
+Do not show the retired browser-side issuer, “VERIFIED TRANSMISSION,” Classic `manageData`, or self-signed credential flow. Do not claim a real anchor partnership, institutional acceptance, production data, or mainnet deployment.

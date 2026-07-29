@@ -1,5 +1,10 @@
 # SelyoPass – Project Context
 
+> **Historical snapshot — not current authority.** This file describes the superseded Level 1
+> concept and contains unvalidated partner, market, and deployment claims. Use root `context.md`,
+> `idea.md`, `DESIGN.md`, and `docs/index.md` for the current two-contract recovery. Do not cite
+> this snapshot as present runtime, partner, legal, or market evidence.
+
 > **Status:** Hypothesis-stage. Stellar Level 1 White Belt mechanics shipped. Customer validation in progress (n=1 confirmed, additional founder interviews scheduled). Building toward Stellar Level 3 submission and APAC Hackathon idea submission (June 30).
 
 ---

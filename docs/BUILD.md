@@ -7,7 +7,7 @@ doc: build
 
 # Build Guide — SelyoPass
 
-**Active phase:** Phase 01 — recovery foundation  
+**Active phase:** Phase 01 — recovery foundation
 **Plan:** [`plans/phase-01-recovery-foundation.md`](plans/phase-01-recovery-foundation.md)
 
 ## 1. Build-wide planning inputs
