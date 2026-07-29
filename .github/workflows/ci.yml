@@ -149,7 +149,7 @@ jobs:
           docker run --detach --name stellar-quickstart --publish 8000:8000 \
             stellar/quickstart@sha256:c8f1a95e43f5c0ff0b3d2ce6c3db008ccb0754ffa50175c4e0ef06b9d643b490 \
             --local --enable-soroban-rpc
-          for attempt in $(seq 1 60); do
+          for _ in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:8000/soroban/rpc \
               -H 'content-type: application/json' \
               --data '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' | grep -q healthy; then
@@ -163,8 +163,16 @@ jobs:
         run: |
           stellar keys generate selyopass-ci
           ci_address="$(stellar keys address selyopass-ci)"
-          curl --fail --silent --show-error \
-            "http://127.0.0.1:8000/friendbot?addr=${ci_address}" > friendbot.json
+          funded=0
+          for _ in $(seq 1 60); do
+            if curl --fail --silent --show-error \
+              "http://127.0.0.1:8000/friendbot?addr=${ci_address}" > friendbot.json; then
+              funded=1
+              break
+            fi
+            sleep 2
+          done
+          test "$funded" -eq 1
           STELLAR_IDENTITY=selyopass-ci \
           STELLAR_NETWORK=local \
           SELYOPASS_SKIP_BUILD=1 \
