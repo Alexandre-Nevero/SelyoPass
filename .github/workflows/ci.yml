@@ -5,23 +5,272 @@ on:
     branches: ['**']
   pull_request:
     branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: 22.23.0
+  FMD_SHA: 53a7b4c03f67f50e9258e2c4acdf7588502133a5
+  STELLAR_CLI_VERSION: 27.0.0
 
 jobs:
-  test-and-build:
-    runs-on: ubuntu-latest
+  documentation:
+    name: FMD validation
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - name: Fetch pinned FMD factory
+        run: |
+          git init .fmd-ci
+          git -C .fmd-ci remote add origin https://github.com/Alexandre-Nevero/Founder-Knowledge-Base.git
+          git -C .fmd-ci fetch --depth=1 origin "$FMD_SHA"
+          git -C .fmd-ci checkout --detach FETCH_HEAD
+          test "$(git -C .fmd-ci rev-parse HEAD)" = "$FMD_SHA"
+          test -d .fmd-ci/FMD
+      - name: Validate generated documents
+        run: |
+          python3 .fmd-ci/FMD/tools/check-doc-status.py docs/
+          python3 .fmd-ci/FMD/tools/check-phase-plan.py --strict docs/plans/phase-*.md
+          python3 .fmd-ci/FMD/tools/check-context-overlay.py \
+            --index docs/index.md \
+            --ledger docs/DECISION-LEDGER.md \
+            --build docs/BUILD.md
+      - name: Run FMD validator self-tests
+        run: |
+          python3 .fmd-ci/FMD/tools/check-doc-status.py --self-test
+          python3 .fmd-ci/FMD/tools/check-phase-plan.py --self-test
+          python3 .fmd-ci/FMD/tools/check-context-overlay.py --self-test
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+  frontend:
+    name: Frontend static and unit
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
-          node-version: '22'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm run test:run
-
-      - name: Build
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:run -- --reporter=default --reporter=junit --outputFile.junit=test-results/vitest.xml
+      - run: npm run test:manifests
+      - name: Production build
         run: npm run build
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: frontend-build-and-tests
+          path: |
+            dist/
+            test-results/vitest.xml
+          if-no-files-found: error
+
+  contracts:
+    name: Contracts and bindings
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
+        with:
+          toolchain: 1.96.0
+          components: clippy,rustfmt
+          targets: wasm32v1-none
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            contracts/target
+          key: rust-${{ runner.os }}-${{ hashFiles('rust-toolchain.toml', 'contracts/Cargo.lock') }}
+      - name: Install pinned Stellar CLI
+        run: |
+          curl -fsSLo stellar-cli.tar.gz \
+            https://github.com/stellar/stellar-cli/releases/download/v27.0.0/stellar-cli-27.0.0-x86_64-unknown-linux-gnu.tar.gz
+          echo "357bf712f6353c28cd33c794402a3c87231757a5b305e6ef1604365af4fdd556  stellar-cli.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/stellar-bin"
+          tar -xzf stellar-cli.tar.gz -C "$RUNNER_TEMP/stellar-bin"
+          echo "$RUNNER_TEMP/stellar-bin" >> "$GITHUB_PATH"
+      - run: cargo fmt --manifest-path contracts/Cargo.toml --all -- --check
+      - run: cargo clippy --manifest-path contracts/Cargo.toml --workspace --all-targets -- -D warnings
+      - run: cargo test --manifest-path contracts/Cargo.toml --workspace
+      - name: Build optimized release WASMs
+        run: cargo build --manifest-path contracts/Cargo.toml --workspace --release --target wasm32v1-none
+      - name: Execute release WASMs together
+        run: cargo test --manifest-path contracts/Cargo.toml --test wasm_cross_contract -- --ignored
+      - run: bash contracts/tests/deploy-script-static.sh contracts/deploy.sh
+      - run: npm run check:bindings
+      - name: Hash WASMs
+        run: sha256sum contracts/target/wasm32v1-none/release/*.wasm | tee contracts/target/wasm-sha256.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: release-wasms
+          path: |
+            contracts/target/wasm32v1-none/release/*.wasm
+            contracts/target/wasm-sha256.txt
+          if-no-files-found: error
+
+  integration:
+    name: Local Quickstart integration
+    needs: contracts
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: release-wasms
+          path: contracts/target/wasm32v1-none/release
+      - name: Install pinned Stellar CLI
+        run: |
+          curl -fsSLo stellar-cli.tar.gz \
+            https://github.com/stellar/stellar-cli/releases/download/v27.0.0/stellar-cli-27.0.0-x86_64-unknown-linux-gnu.tar.gz
+          echo "357bf712f6353c28cd33c794402a3c87231757a5b305e6ef1604365af4fdd556  stellar-cli.tar.gz" | sha256sum -c -
+          sudo tar -xzf stellar-cli.tar.gz -C /usr/local/bin
+          stellar --version
+      - name: Start pinned Stellar Quickstart
+        run: |
+          docker run --detach --name stellar-quickstart --publish 8000:8000 \
+            stellar/quickstart@sha256:c8f1a95e43f5c0ff0b3d2ce6c3db008ccb0754ffa50175c4e0ef06b9d643b490 \
+            --local --enable-soroban-rpc
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8000/soroban/rpc \
+              -H 'content-type: application/json' \
+              --data '{"jsonrpc":"2.0","id":1,"method":"getHealth"}' | grep -q healthy; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs stellar-quickstart
+          exit 1
+      - name: Exercise two-contract lifecycle
+        run: |
+          stellar keys generate selyopass-ci --network local --fund
+          STELLAR_IDENTITY=selyopass-ci \
+          STELLAR_NETWORK=local \
+          SELYOPASS_SKIP_BUILD=1 \
+          SELYOPASS_EXPIRES_LEDGER=1000000 \
+            bash contracts/deploy.sh | tee quickstart-integration.txt
+          grep -Eq 'Anchor Registry: C[A-Z2-7]{55}' quickstart-integration.txt
+          grep -Eq 'Credential Registry: C[A-Z2-7]{55}' quickstart-integration.txt
+      - name: Capture Quickstart logs
+        if: always()
+        run: docker logs stellar-quickstart > quickstart.log 2>&1 || true
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: quickstart-integration
+          path: |
+            quickstart-integration.txt
+            quickstart.log
+          if-no-files-found: warn
+
+  browser:
+    name: Browser and accessibility
+    needs: frontend
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: frontend-build-and-tests
+          path: downloaded
+      - name: Restore production build
+        run: mv downloaded/dist dist
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:artifact
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: browser-evidence
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+
+  security:
+    name: Security and workflow policy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Dependency audit
+        run: npm audit --omit=dev --audit-level=moderate
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install and run pinned actionlint
+        run: |
+          curl -fsSLo actionlint.tar.gz \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.7/actionlint_1.7.7_linux_amd64.tar.gz
+          echo "023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757  actionlint.tar.gz" | sha256sum -c -
+          tar -xzf actionlint.tar.gz actionlint
+          ./actionlint
+
+  pages:
+    name: GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.RELEASE_READY == 'true'
+    needs: [documentation, frontend, contracts, integration, browser, security]
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: node scripts/validate-manifests.mjs --deployment
+      - run: VITE_BASE_PATH=/SelyoPass/ npm run build
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b
+        with:
+          path: dist
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
+
+  pages-smoke:
+    name: Pages HTTP and browser smoke
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.RELEASE_READY == 'true'
+    needs: pages
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: HTTP smoke
+        env:
+          PAGE_URL: ${{ needs.pages.outputs.page_url }}
+        run: curl --fail --silent --show-error --location "$PAGE_URL"
+      - run: npx playwright install --with-deps chromium
+      - name: Browser smoke
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ needs.pages.outputs.page_url }}
+        run: npx playwright test tests/pages-smoke.spec.js
