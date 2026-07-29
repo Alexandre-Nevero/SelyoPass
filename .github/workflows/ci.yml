@@ -25,12 +25,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
-      - name: Require private FMD read token
+      - name: Require private FMD deploy key
         env:
-          FMD_REPOSITORY_TOKEN: ${{ secrets.FMD_REPOSITORY_TOKEN }}
+          FMD_DEPLOY_KEY: ${{ secrets.FMD_DEPLOY_KEY }}
         run: |
-          test -n "$FMD_REPOSITORY_TOKEN" || {
-            echo "::error::FMD_REPOSITORY_TOKEN must read the private Founder-Knowledge-Base repository."
+          test -n "$FMD_DEPLOY_KEY" || {
+            echo "::error::FMD_DEPLOY_KEY must read the private Founder-Knowledge-Base repository."
             exit 1
           }
       - name: Fetch pinned FMD factory
@@ -38,7 +38,7 @@ jobs:
         with:
           repository: Alexandre-Nevero/Founder-Knowledge-Base
           ref: ${{ env.FMD_SHA }}
-          token: ${{ secrets.FMD_REPOSITORY_TOKEN }}
+          ssh-key: ${{ secrets.FMD_DEPLOY_KEY }}
           path: .fmd-ci
           fetch-depth: 1
       - name: Verify pinned FMD factory
