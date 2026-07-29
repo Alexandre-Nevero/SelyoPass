@@ -2,7 +2,7 @@
 import { sha256Hex } from '../hash.js';
 import { buildCredential } from '../credential.js';
 import { PH_DOCUMENT_TYPES } from '../schema.js';
-import { SIMULATED_ANCHOR_PUBLIC_KEY } from '../anchorIdentity.js';
+const SYNTHETIC_ANCHOR_PUBLIC_KEY = 'GBOR4FSN2AUMTPSNSUQFI5ZME3H2WAVIS6YUSPYXORLXYDDR6OWS4HQL';
 
 export async function syntheticDocumentHashes() {
   const hashes = {};
@@ -27,7 +27,7 @@ export async function validCredentialPayload(overrides = {}) {
       { name: 'John Synthetic', ownership_percentage: 40 },
     ],
     documentHashes,
-    anchorPublicKey: SIMULATED_ANCHOR_PUBLIC_KEY,
+    anchorPublicKey: SYNTHETIC_ANCHOR_PUBLIC_KEY,
     credentialId: 'selyo-test-0001',
     issuedAt: '2026-06-30T00:00:00.000Z',
     ...overrides,
