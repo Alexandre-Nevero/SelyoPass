@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "draft",
+  "releaseSha": null,
+  "commitEvidence": [],
+  "ci": null,
+  "pages": null,
+  "tests": null,
+  "screenshots": null,
+  "deployment": null,
+  "events": [],
+  "interContract": null,
+  "liveDemoUrl": null,
+  "demoVideoUrl": null,
+  "level4": {
+    "developmentStarted": false,
+    "writtenApproval": null
+  },
+  "blockers": [
+    "No protected testnet contract release has run.",
+    "No release-bound CI, Pages, interaction, screenshot, or demo-video evidence exists yet."
+  ]
+}

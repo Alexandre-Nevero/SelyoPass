@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "network": "testnet",
+  "status": "not_deployed",
+  "sourceSha": null,
+  "releasedAt": null,
+  "rpcUrl": "https://soroban-testnet.stellar.org",
+  "contracts": {
+    "anchorRegistry": {
+      "id": null,
+      "wasmSha256": null,
+      "deployTxHash": null
+    },
+    "credentialRegistry": {
+      "id": null,
+      "wasmSha256": null,
+      "deployTxHash": null
+    }
+  },
+  "interactions": {
+    "anchorRegistrationTxHash": null,
+    "requestTxHash": null,
+    "issueTxHash": null
+  },
+  "blocker": "A reviewed protected testnet release has not run yet. No issuer secret is stored in this repository."
+}
