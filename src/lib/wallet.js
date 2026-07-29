@@ -1,55 +1,48 @@
-// Freighter wallet wrapper. Freighter is the only supported wallet (idea.md
-// §10). All wallet failures surface as friendly messages (F-006). The user's
-// private key is never handled here — signing happens inside Freighter (BR-002).
-import {
-  isConnected,
-  requestAccess,
-  getPublicKey,
-  signTransaction,
-} from '@stellar/freighter-api';
-import { NETWORK_PASSPHRASE, NETWORK } from './stellar.js';
+import { StellarWalletsKit } from '@creit.tech/stellar-wallets-kit/sdk';
+import { Networks } from '@creit.tech/stellar-wallets-kit/types';
+import { FreighterModule, FREIGHTER_ID } from '@creit.tech/stellar-wallets-kit/modules/freighter';
+import { AlbedoModule, ALBEDO_ID } from '@creit.tech/stellar-wallets-kit/modules/albedo';
 
 export class WalletError extends Error {}
+export const TESTNET_PASSPHRASE = Networks.TESTNET;
 
-export async function connectWallet() {
-  let detected;
-  try {
-    detected = await isConnected();
-  } catch (_) {
-    detected = false;
-  }
-  if (!detected) {
-    throw new WalletError(
-      'Freighter not detected. Install/enable the Freighter extension (set to Testnet), then refresh.'
-    );
-  }
+StellarWalletsKit.init({
+  network: Networks.TESTNET,
+  modules: [new FreighterModule(), new AlbedoModule()],
+});
 
-  let access;
-  try {
-    access = await requestAccess();
-  } catch (_) {
-    throw new WalletError('Connection rejected. Approve the connection request in Freighter.');
-  }
-  if (!access || access === 'denied') {
-    throw new WalletError('Connection rejected. Approve the connection request in Freighter.');
-  }
-
-  const publicKey = await getPublicKey();
-  if (!publicKey) {
-    throw new WalletError('Could not read your wallet address from Freighter.');
-  }
-  return { publicKey };
+export function createWalletService({
+  kit = StellarWalletsKit,
+  ids = { Freighter: FREIGHTER_ID, Albedo: ALBEDO_ID },
+} = {}) {
+  let connected = null;
+  return {
+    async connect(kind) {
+      if (!ids[kind]) throw new WalletError('Only Freighter and Albedo are supported in this build.');
+      try {
+        kit.setWallet(ids[kind]);
+        const { address } = await kit.fetchAddress();
+        const network = await kit.getNetwork();
+        if (network?.networkPassphrase && network.networkPassphrase !== Networks.TESTNET) {
+          throw new WalletError('Wallet is on the wrong network. Switch it to Stellar Testnet.');
+        }
+        connected = { address, wallet: kind };
+        return connected;
+      } catch (error) {
+        if (error instanceof WalletError) throw error;
+        throw new WalletError(error?.message || `${kind} connection was declined or unavailable.`);
+      }
+    },
+    async sign(unsignedXdr, address = connected?.address) {
+      if (!address) throw new WalletError('Connect a wallet before signing.');
+      const { signedTxXdr } = await kit.signTransaction(unsignedXdr, {
+        networkPassphrase: Networks.TESTNET,
+        address,
+      });
+      if (!signedTxXdr) throw new WalletError('Wallet signature was declined.');
+      return signedTxXdr;
+    },
+  };
 }
 
-// Signs a transaction XDR with Freighter and returns the signed XDR string.
-// (freighter-api 2.0.0 returns the signed XDR as a string.)
-export async function signXDR(xdr) {
-  const signed = await signTransaction(xdr, {
-    networkPassphrase: NETWORK_PASSPHRASE,
-    network: NETWORK,
-  });
-  if (!signed) {
-    throw new WalletError('Transaction signing was declined in Freighter.');
-  }
-  return signed;
-}
+export const walletService = createWalletService();
