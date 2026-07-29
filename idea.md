@@ -1,134 +1,136 @@
 ---
 status: draft
-schema_version: 1.1.0
+schema_version: 3.0.0
+origin: "existing SelyoPass brief; recovery plan approved 2026-07-29"
+payer_status: none-found
 ---
 
-<!--
-  idea.md — THE CONTRACT (idea-forge schema v1.1.0)
-
-  Status is intentionally DRAFT. Customer interviews are strategically deferred
-  to ship the Stellar Level 3 + APAC submission by June 30 (solo developer,
-  competing academic load). The evidence floor is therefore NOT met by design:
-  validation is n=1 (Dserve) and unlogged. Do not set status: frozen until the
-  behavioral evidence exists. Unverified claims are tagged [unverified] honestly
-  rather than reworded to pass the gate.
-
-  2026-06-30: Added desk-research leads (verified against primary/secondary
-  sources) to §5, §6, §9 — all `said`-grade. These do NOT touch the evidence
-  floor (still zero behavioral did/paid). Fabricated items from the source
-  research (a non-existent "Acredia" protocol) and unconfirmed competitor
-  claims (VYB Solutions) were deliberately excluded.
--->
-
-# Idea: SelyoPass — verify your business once, stop re-proving it to every financial partner
+# Idea: SelyoPass
 
 ## 1. Problem statement
 
-Early-stage Philippine startups that connect to banks, payment gateways, and other regulated financial institutions must prove their corporate identity from scratch with every single partner. Each institution asks for nearly identical business documents — SEC registration, BIR certificate, Mayor's Permit, Articles of Incorporation, beneficial-ownership disclosure — and each runs its own independent intake and review cycle, even though they are all confirming the exact same legal entity. A founder connecting four partners assembles, submits, and chases the same paperwork four separate times, absorbing weeks of compounded delay before a single connection goes live, then repeats the entire ordeal for every new partner afterward. The work is duplicated, the founder bears the cost, and nothing they did for the last institution carries over to the next.
+Early-stage Philippine startups repeatedly submit substantially the same corporate-identity
+documents to each bank and payment provider. Each institution must retain its own compliance
+judgment, but document collection and parsing are duplicated. The result is repeated founder work
+and avoidable integration delay. Generalization beyond one founder account remains unvalidated.
 
 ## 2. Target segment
 
-Early-stage Philippine startups in their first ~18 months that complete two or more financial integrations (a bank plus one or more payment providers). Concretely: fintech startups subject to BSP licensing, marketplace platforms needing multiple banking partners, and B2B SaaS companies with embedded payments. Findable this week: the founder of **Dserve** (a Manila marketplace platform), plus the founders lined up for the Thursday interview round in the same Manila startup network. "All SMEs" is explicitly not the segment — the pain concentrates in startups doing several regulated integrations in a short window.
+Philippine startups in roughly their first 18 months that complete at least two regulated financial
+integrations. The initial user is a founder or operator preparing corporate records; the other
+participants are a regulated anchor and a relying institution. For this build, the anchor is
+simulated, all records are synthetic, and no institution has agreed to accept the output.
 
 ## 3. Evidence
 
-> Validation is strategically deferred. The bullets below reflect what is actually known today. Behavioral evidence is n=1 and not yet logged as a dated artifact, so most claims are marked `[unverified]`. This section will not satisfy the linter's evidence floor, and that is the honest current state.
+| Claim | Evidence type | Source / date | Confidence | What remains unknown |
+|---|---|---|---|---|
+| One Manila startup repeatedly submitted similar documents to several partners and associated the process with launch delay. | did, unlogged | Dserve founder account, date unconfirmed | low | No dated artifact; n=1; recurrence across the segment is unknown. |
+| Corporate onboarding can take weeks and duplicate collection occurs across parties. | said | secondary industry sources captured in the prior brief, 2025–2026 | low | Sources are not PH-startup behavioral evidence. |
+| A relying institution will accept a portable credential as preferred intake. | none | — | unvalidated | This is the riskiest demand-side assumption. |
+| A buyer will pay for issuance or reuse. | paid | none | none | Buyer, budget owner, price, and procurement path are unknown. |
 
-- The Dserve founder, unprompted, described submitting near-identical compliance documents separately to UnionBank, Xendit, GCash for Business, and Google programs — different forms and timelines for each, despite all verifying the same entity — and tied it directly to a delayed product launch. This is real past behavior (a `did`-grade signal for the problem), but the conversation is not yet logged with a confirmed date or interview artifact. [unverified]
-- Independent industry sources quantify the same commercial-onboarding pain: Deloitte (via Backbase) reports commercial client onboarding takes 16+ weeks at $20k–$30k per client; McKinsey (via Dakota) reports 43–64 days for corporate onboarding at traditional institutions. These are secondary `said`-grade sources, not first-person evidence for SelyoPass's segment. [unverified]
-- fintech.global (June 2025) articulates the thesis without naming it: the same client being onboarded multiple times by different parties, with no single source of truth. Secondary `said`-grade. [unverified]
-- No startup has paid, pre-paid, or signed a binding commitment for this. No institution has agreed to accept the output as preferred intake. There is zero `paid` evidence. [unverified]
-
-### Four tests
-
-| Test | Pass/Fail | Why |
-|------|-----------|-----|
-| Real (does it actually happen?) | Pass | Confirmed n=1 (Dserve, past behavior) and corroborated by independent industry quantification. |
-| Large (enough people?) | Unverified | One founder. Generalization across PH startups is the explicit open question for the deferred interviews. |
-| Significant (do they care?) | Likely | The pain was volunteered as a launch-blocker, not extracted — a strong signal, but still n=1. |
-| Urgent (now, not someday?) | Pass (windowed) | Acute specifically during the integration window in a startup's first 18 months; outside that window the pain fades. |
+**Evidence boundary:** there is one weak `did` signal, zero `paid` evidence, no anchor commitment,
+and no relying-party acceptance evidence. This document must remain `draft`.
 
 ## 4. Root cause (the WHY)
 
-Why do institutions re-collect the same documents? Because each regulated entity must independently satisfy its own customer-due-diligence obligation. Why can't one entity trust another's collection? Because compliance liability is non-transferable — BSP Circular 1170 and the AMLA implementing rules place the obligation on the regulated entity itself, and no contract reassigns it. Why doesn't a shared, reusable record of the collected documents exist? Because there is no neutral, trusted format for the collected-and-verified package that an institution can read and rely on without re-doing the work. Why has no neutral party built it? Because the institution-side vendors are paid per verification — a reusable record that travels with the business would cannibalize their revenue, so they have no incentive to build it.
-
-Structural root cause: the duplicated work is not the compliance *judgment* (which legally cannot be shared) — it is the document *collection and parsing* step in front of the judgment, and no business-owned, institution-readable format for that step exists. It stays unsolved because the parties with the incentive to fix it (institutions) are on the wrong side of the economics, and the party with the pain (the startup) has no standard to carry.
+Compliance judgment and liability remain with each regulated institution, so the judgment cannot be
+outsourced merely by presenting a credential. The duplicative part is the collection, normalization,
+and integrity checking that precedes that judgment. No adopted, business-held, institution-readable
+package currently carries those records between partners in this segment.
 
 ## 5. Market & alternatives
 
-Bottom-up reachability, not top-down market share. Reachable this week in at least two places: the Manila startup founder network (direct interviews) and BSP/Stellar-ecosystem channels around PDAX.
-
-**Startup-side market is small (model estimate, not verified).** A bottom-up desk estimate puts the immediately reachable PH segment at roughly 2,500 businesses/year × ~$250/yr ≈ ~$625k/yr — but it rests on assumed capture rates (≈20% of ~1,200 active tech startups + ≈6% of new digital MSMEs), not hard counts, so treat it as order-of-magnitude only. The directional takeaway matters: the startup-pays-per-credential wedge is not, by itself, a venture-scale business. The institution side (BSFI onboarding spend) was never sized and is where the thesis says the real value sits.
-  > [!evidence] Type: said | Source: gemini-deep-research desk estimate (assumptions, not counts) | Date: 2026-06-30
-
-Top alternatives and where each fails:
-- **Do nothing — the manual workaround** (a shared Drive folder, a spreadsheet tracking which institution got which document, or a part-time compliance person). This is the real competitor. It fails by not scaling: every new partner restarts the chase, and nothing is reusable or verifiable. [unverified]
-- **Institution-side verification vendors** (AsiaVerify, HyperVerge, Sumsub, Persona). They sell verification *to institutions*; their "reusable KYC/KYB" features are gated inside each vendor's own client network, and their per-verification revenue model makes a portable, business-owned credential self-cannibalizing.
-  > [!evidence] Type: said | Source: https://sumsub.com/ph/kyc-compliance/ | Date: 2026-06-30
-- **Individual reusable-identity players (adjacent, not direct).** eKYC.ph markets "onboard once, reuse forever, powered by blockchain" — but for *individuals* ("Create Your Shareable ID"), not business KYB. Adjacent; worth watching for a business-side move, but not a confirmed competitor today. (Source desk research wrongly merged this with VYB Solutions; the live site shows an individual-identity product.)
-  > [!evidence] Type: said | Source: https://ekyc.ph/ | Date: 2026-06-30
-- **Regulator-led portable identity** (Singapore Myinfo Business, India Account Aggregator; PH: Philippine Business Hub / eGov PH). These solve a similar "verify once" problem, but the PH systems are built for *inbound* government registration, not an *outbound* API private banks can query — so UnionBank/Xendit/GCash still collect documents from the startup directly. [unverified]
-
-**Supporting build signal (verified).** SEP-9 (Stellar's standard KYC field list) already defines `organization.*` fields — name, registration_number, registration_date, director_name, shareholder_name, incorporation-doc image — but they are thin: no beneficial-ownership percentage, no GIS, no Mayor's Permit, no BIR. That gap is exactly what a PH KYB extension (F-001) fills, which supports the "extend a published standard" positioning rather than inventing one.
-  > [!evidence] Type: said | Source: https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0009.md | Date: 2024-04-22
+The real alternative is a shared-drive document pack plus manual forms and follow-up. Institution-side
+KYB vendors serve the relying institution and typically keep reuse inside their own network.
+Government business-registration systems are adjacent but are not established here as outbound,
+bank-queryable portable KYB services. The prior startup-side estimate was assumption-heavy and is not
+used as a market fact. SEP-9 supplies a useful organization-field precedent, but does not itself prove
+demand for SelyoPass.
 
 ## 6. Value proposition
 
-For early-stage Philippine startups who must re-prove their corporate identity to every new financial partner, this is a portable KYB credential that lets them get verified once by a regulated anchor and present a signed, independently verifiable record to each subsequent institution, unlike re-submitting the same document pack from scratch every time, because a regulated anchor (not SelyoPass) is the verifier of record.
-
-**Positioning (load-bearing): a secure data courier, not a compliance stamp.** SelyoPass eliminates the document *collection and parsing* step; it does not replace the institution's compliance judgment. Under BSP Circular 1170 that judgment and its liability stay with the relying institution, so the credential must be framed as structured, signed, hash-verifiable document *transmission* — never as a "verified, trust-this-business" stamp. This is the version of the pitch that survives a compliance officer's first question. Caveat: a SEP-12-compatible institution still has to implement reading the credential and choose to trust the issuing anchor; "any institution can read it without custom integration" overstates the lift.
+For early-stage Philippine startups repeating corporate-document intake, SelyoPass is a portable,
+hash-verifiable evidence package issued by an authorized anchor and independently checkable by a
+financial partner. It is a **secure data courier, not a compliance stamp**: it can reduce collection
+and integrity-checking work, but never replaces the institution's KYB decision.
 
 ## 7. Feature set
 
-<!-- Stable IDs. F-001+ = MVP / Level 3 submission scope; F-101+ = final vision.
-     Never renumber; retire and add. -->
+This section is the canonical seed feature registry. It owns each immutable `F-###` identity, the
+seed intent attached to that identity, and its current MoSCoW priority. Downstream feature tables
+are projections for traceability; they may shorten labels but must not mint, rename, renumber, or
+reprioritize a feature. A priority or seed-intent change starts here and is then reconciled outward.
 
-**MVP** (Stellar Level 3 + APAC submission scope; each feature names the problem it solves):
-- **F-001** — SEP-12-extended KYB credential schema for Philippine business documents (SEC, BIR, Mayor's Permit, Articles of Incorporation, beneficial ownership, GIS) → solves the "no shared, institution-readable format" root cause (§4).
-- **F-002** — Anchor-issued signed credential flow implemented as a Soroban smart contract on testnet (issuance, not just an XLM payment-with-memo) → solves the re-verification-from-scratch pain (§1).
-- **F-003** — Document hash anchoring: documents stay off-chain with the startup, only the content hash is anchored on-chain → lets an institution confirm the document it reads matches what the anchor verified, without SelyoPass custodying anything (§3 trust gap).
-- **F-004** — Relying-party reader: a view that reads a credential, verifies the issuer's signature against the anchor's public key, and validates document hashes → proves the consumption side of the network exists, not just issuance.
-- **F-005** — Mobile-responsive frontend for both issuance and relying-party views → Level 3 requirement.
-- **F-006** — Error handling and loading states across wallet connect, issuance, and verification flows → Level 3 requirement.
-
-**Final**:
-- **F-101** — Continuous credentials: re-verification events (new GIS, new beneficial owners, sanctions hits) streamed as updates, so the credential is living rather than a one-time snapshot.
-- **F-102** — Cross-jurisdiction schema extension (Indonesia OJK-compatible UBO fields, Bahasa-language fields, jurisdiction-tagged hashes) for SEA expansion.
-- **F-103** — Inter-contract communication: separate issuer, registry, and relying-party contracts coordinating on-chain (anchors the "advanced smart contract" Level 3 dimension).
-- **F-104** — Anchor onboarding integration so a regulated anchor (PDAX as the bootstrap candidate) issues SelyoPass credentials by default and reads them as a relying party from day one.
+| `F-###` | Feature | Priority | Solves (problem from §1/§3) | Why not / what would change it |
+|---|---|---|---|---|
+| F-001 | Philippine KYB presentation schema for synthetic SEC, BIR, permit, incorporation, GIS, and beneficial-ownership document descriptors | Must | No shared, institution-readable package | — |
+| F-002 | Subject-requested and authorized-anchor-issued Soroban credential lifecycle on Stellar testnet | Must | Reusable provenance cannot be independently inspected | — |
+| F-003 | Local document hashing with hash-only on-chain anchoring | Must | Integrity must be checkable without SelyoPass custody | — |
+| F-004 | Wallet-free relying-party integrity reader | Must | A portable record has no value without independent consumption | — |
+| F-005 | Responsive founder, anchor, and relying-party workflows | Must | Submission and field use include mobile contexts | — |
+| F-006 | Explicit loading, transaction, rejection, expiry, revocation, and recovery states | Must | Blockchain and wallet failures otherwise become ambiguous | — |
+| F-007 | Target multi-wallet support through Stellar Wallets Kit | Must | Authorization must not depend on one wallet extension | Target adapters: Freighter and Albedo; support remains unproven until real connection tests pass. |
+| F-008 | Observable transaction lifecycle and near-real-time RPC event synchronization | Must | Users need durable evidence instead of indefinite spinners | — |
+| F-101 | Continuous re-verification updates | Won't | Credentials become stale | Reason: Level 4 work requires written approval. Reconsider after approval and a real-anchor lifecycle design. |
+| F-102 | Cross-jurisdiction schema extensions | Won't | Regional reuse | Reason: Philippines-only scope. Reconsider after written Level 4 approval and jurisdiction research. |
+| F-103 | Two meaningful contracts: Anchor Registry authorizes issuers; Credential Registry manages requests and lifecycle through a real cross-contract call | Must | Advanced authorization must be inspectable rather than simulated by artificial layers | — |
+| F-104 | Real regulated-anchor onboarding | Won't | A simulated anchor does not validate institutional adoption | Reason: no anchor commitment or Level 4 approval. Reconsider after written approval and partner agreement. |
 
 ## 8. Success metrics
 
-Product (post-launch): **Activation** — a startup completes credential issuance and presents it to at least one institution. **Retention** — the same credential is reused across two or more institutions without re-collection. **Revenue** — startups paying per credential issued. No vanity metrics (signups, page views, GitHub stars).
-
-Submission (June 30 Level 3, the near-term measurable): working credential issuance and verification on Stellar testnet with a published contract deployment address and interaction transaction hash; ≥3 passing tests across contract and frontend; green CI/CD pipeline; live demo URL; mobile-responsive UI; 1–2 minute demo video.
+- **Activation:** a public user submits one real testnet credential request through the frontend.
+- **Lifecycle proof:** an authorized simulated-anchor wallet issues it through the second contract,
+  and the UI observes the transaction and contract event.
+- **Integrity proof:** a relying party verifies existence, issuer authorization, document hashes,
+  active status, and transaction/event provenance without connecting a wallet.
+- **Delivery proof:** frontend, contract, integration, accessibility, and browser gates are green for
+  one release SHA; the deployed GitHub Pages build passes post-deploy smoke checks.
+- **Learning:** obtain a relying institution's written accept/reject decision on preferred intake.
+  No revenue target is claimed because willingness to pay is unvalidated.
 
 ## 9. Constraints, risks & kill criteria
 
-**Single riskiest assumption (revised after research):** that at least one regulated institution will accept the credential as *preferred intake* — reading the structured data plus document hashes instead of re-collecting PDFs — given that BSP Circular 1170 keeps customer-due-diligence liability non-transferable. This is a demand-side, institution-side question, and it is the thing most likely to kill the project. The chicken-and-egg (startups won't pay for a credential nobody reads; institutions won't read one nobody carries) is downstream of it; the only resolution on the table is a regulated anchor (PDAX, unconfirmed) acting as both first issuer and first relying party. Validation must therefore target compliance officers, not just founders.
-
-**Verified regulatory constraints (desk-level, `said`):**
-- BSP Circular 1170 (30 Mar 2023) permits reliance on third-party / digital-ID systems but states the relying covered person retains ultimate responsibility for identification and verification. The credential cannot claim to transfer liability.
-  > [!evidence] Type: said | Source: BSP Circular No. 1170 (2023) via lexology.com | Date: 2023-03-30
-- SEC Memorandum Circular No. 15, s.2025 tightened ultimate-beneficial-owner disclosure, effective January 2026 — the KYB schema (F-001) must carry current UBO fields to stay aligned.
-  > [!evidence] Type: said | Source: SEC MC No. 15 s.2025 via verihubs.com/blog/kyb-know-your-business | Date: 2026-01-01
-- RA 10173 (Data Privacy Act): collecting officer / beneficial-owner personal data makes SelyoPass a personal-information controller. NPC Circular No. 2022-04 mandates DPO + Data Processing System registration for entities processing personal data of 250+ employees, 1,000+ individuals, or in a way that poses a risk to data subjects — SelyoPass crosses the 1,000-individual threshold quickly. Administrative fines reach 3% of annual gross income (NPC Circular 2022-01).
-  > [!evidence] Type: said | Source: privacy.gov.ph (NPC Circular 2022-04) via bakermckenzie.com | Date: 2022-12-05
+**Single riskiest assumption:** at least one regulated institution will accept the package as
+preferred intake while retaining its own compliance decision.
 
 **Kill criteria (explicit fail-states):**
-- Institutional (new, highest priority): if no regulated institution will accept the credential as preferred intake — i.e., they ingest the data but still demand the original PDFs to satisfy auditors — the network thesis collapses; narrow to a document-portability tool or pivot.
-- Regulatory: if BSP/DICT ships an outbound, bank-queryable portable business-identity API (a Myinfo Business equivalent), the home-market thesis collapses — stop, or pivot to interoperability.
-- Unit economics: if founder interviews show zero willingness to pay to skip the document chase across multiple integrations, the model is dead at this segment — pivot to a higher-pain segment.
-- Technical: if a SEP-12 KYB extension cannot be made interoperable, or Soroban-based issuance + verification cannot be demonstrated on testnet by the deadline, narrow the submission to the credential schema plus a reader demo rather than full inter-contract flows.
 
-Additional binding constraint: see RA 10173 above — NPC registration and a privacy management program are required before federating any real corporate data.
+- **Institutional:** no target institution will use the structured package or hashes to reduce
+  collection work; narrow to document-portability tooling or stop.
+- **Regulatory:** counsel or regulator interpretation makes the proposed presentation unusable;
+  stop external rollout and retain a synthetic testnet demonstrator only.
+- **Unit economics:** no identifiable buyer or budget owner will pay after repeated use is proven;
+  do not claim a viable business model.
+- **Technical:** two-wallet request, authorized cross-contract issue, event observation, and public
+  integrity verification cannot be reproduced on testnet; do not submit the corresponding claim.
 
-## 10. Out of scope (for now)
+**Invariants (`INV-###`) — hard product rules that must hold across every pivot:**
 
-- Replacing or performing the institution's compliance judgment (sanctions/PEP screening, beneficial-ownership decisioning, financial decisioning) — the anchor and institution own this.
-- Custodying documents — the startup retains them; only hashes are anchored.
-- Mainnet deployment — testnet only for the submission.
-- Wallets other than Freighter.
-- Jurisdictions beyond the Philippines for the MVP (Indonesia/Vietnam/Malaysia are final-vision, not now).
-- Securing the actual PDAX partnership — that is a business-development track, not a build deliverable, and must not block the Level 3 submission.
-- Customer interviews and willingness-to-pay validation — strategically deferred until after June 30; this is why the brief stays DRAFT.
+- **INV-001** — SelyoPass must never claim that credential integrity equals compliance approval or
+  transfers the relying institution's KYB responsibility.
+- **INV-002** — Real personal data is prohibited throughout the build. Identity-shaped values are
+  allowed only when explicitly synthetic and confined to local fixtures/browser-local packages;
+  document bytes, identity fields, and free-text rejection reasons must never enter Stellar state,
+  events, logs, or public/submission evidence.
+- **INV-003** — No private key or secret seed may enter source, browser storage, fixtures,
+  documentation, logs, or CI artifacts; wallets perform signing.
+- **INV-004** — Credential issuance and rejection require current Anchor Registry membership plus
+  issuer authorization. Revocation requires authorization by the record's original issuer and must
+  remain possible after that issuer is later removed from Anchor Registry.
+- **INV-005** — A subject request must never be submitted without that subject's wallet
+  authorization, and public verification must never require a wallet.
+- **INV-006** — Production-visible evidence must never describe simulated, testnet, planned, or
+  unverified behavior as real, mainnet, deployed, validated, or regulator-approved.
+- **INV-007** — Level 4-only development and real-data handling must never begin without written
+  Stellar Builder Team approval and the applicable privacy/security gates.
+
+## 10. Out of scope (for now) — non-feature exclusions only
+
+- Mainnet and real corporate or beneficial-owner data.
+- Jurisdictions outside the Philippines.
+- A SelyoPass server, database, document custody, or institution decision engine.
+- Sanctions, PEP, risk, credit, or compliance decisioning.
+- A real anchor relationship or claim of institutional acceptance.
+- Level 4 implementation before written approval.
