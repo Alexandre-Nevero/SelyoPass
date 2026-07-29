@@ -1,93 +1,233 @@
-// F-002 (on-chain anchoring) — records ONLY the credential fingerprint hash on
-// Stellar testnet via a manageData entry. BR-002: documents and PII never go
-// on-chain. This module is the swap point for a future Soroban contract: it is
-// the only place that writes to the ledger.
-//
-// NOTE ON SCOPE: idea.md §7 F-002 targets a Soroban smart contract. This MVP
-// anchors the hash with a classic manageData operation because the build
-// environment has no Rust/soroban toolchain (documented deviation; idea.md §9
-// technical kill-criterion permits narrowing). The trust model (the anchor's
-// ed25519 signature) is unchanged.
 import { Buffer } from 'buffer';
-import * as StellarSdk from '@stellar/stellar-sdk';
-import { NETWORK_PASSPHRASE, horizonServer } from './stellar.js';
-import { hexToBytes } from './hash.js';
-import { credentialFingerprintHex } from './credential.js';
+import {
+  Networks,
+  TransactionBuilder,
+  hash,
+  rpc,
+  scValToNative as sdkScValToNative,
+} from '@stellar/stellar-sdk';
+import deploymentManifest from '../../deployments/testnet.json';
+import { Client as AnchorRegistryClient } from '../contracts/anchor-registry/src/index.ts';
+import { Client as CredentialRegistryClient } from '../contracts/credential-registry/src/index.ts';
 
-const DATA_NAME_PREFIX = 'selyopass:';
-const MANAGE_DATA_VALUE_MAX = 64; // Stellar protocol limit for a data value.
+export const CONTRACT_METHODS = Object.freeze([
+  'request', 'issue', 'reject', 'revoke', 'get', 'status', 'exists', 'is_authorized',
+]);
 
-export function anchorDataName(credentialId) {
-  // manageData names are limited to 64 bytes; credential ids fit comfortably.
-  const name = `${DATA_NAME_PREFIX}${credentialId}`;
-  if (Buffer.byteLength(name, 'utf8') > 64) {
-    return name.slice(0, 64);
+const REQUIRED_ADAPTER_METHODS = [...CONTRACT_METHODS, 'getEvents', 'submit', 'confirm'];
+const CONTRACT_ID = /^C[A-Z2-7]{55}$/;
+const HEX_32 = /^[0-9a-f]{64}$/i;
+const REASON_CODES = Object.freeze({ demo_review: 1, demo_revocation: 2 });
+const EVENT_RECOVERY_LEDGERS = 120;
+
+export function credentialIdBytes(value) {
+  if (typeof value !== 'string' || !value.trim()) throw new Error('Credential ID is required.');
+  if (HEX_32.test(value.trim())) return Buffer.from(value.trim(), 'hex');
+  return hash(Buffer.from(value.trim(), 'utf8'));
+}
+
+export function hexBytes(value, label = 'hash') {
+  if (typeof value !== 'string' || !HEX_32.test(value)) {
+    throw new Error(`${label} must be a 64-character SHA-256 hex value.`);
   }
-  return name;
+  return Buffer.from(value, 'hex');
 }
 
-// BR-002 guard — the on-chain value is exactly the 32-byte SHA-256 fingerprint.
-// Throws if anything other than a clean 64-char hex hash is passed in, which
-// makes it impossible to accidentally write document bytes or PII on-chain.
-export function buildAnchorValue(fingerprintHex) {
-  if (typeof fingerprintHex !== 'string' || !/^[0-9a-f]{64}$/.test(fingerprintHex)) {
-    throw new Error('on-chain anchor value must be a 64-char SHA-256 hex fingerprint');
-  }
-  const value = Buffer.from(hexToBytes(fingerprintHex)); // 32 bytes
-  if (value.length > MANAGE_DATA_VALUE_MAX) {
-    throw new Error('anchor value exceeds manageData size limit');
-  }
-  return value;
+function unwrap(result) {
+  return typeof result?.unwrap === 'function' ? result.unwrap() : result;
 }
 
-// Builds the unsigned anchoring transaction (XDR). Loads the source account
-// from Horizon and attaches a single manageData op carrying the fingerprint.
-export async function buildAnchorTransactionXDR(sourcePublicKey, credential) {
-  const fingerprint = await credentialFingerprintHex(credential);
-  const server = horizonServer();
-  const account = await server.loadAccount(sourcePublicKey);
-
-  const tx = new StellarSdk.TransactionBuilder(account, {
-    fee: StellarSdk.BASE_FEE,
-    networkPassphrase: NETWORK_PASSPHRASE,
-  })
-    .addOperation(
-      StellarSdk.Operation.manageData({
-        name: anchorDataName(credential.credential_id),
-        value: buildAnchorValue(fingerprint),
-      })
-    )
-    .addMemo(StellarSdk.Memo.text('SelyoPass KYB anchor'))
-    .setTimeout(120)
-    .build();
-
-  return { xdr: tx.toXDR(), fingerprint, dataName: anchorDataName(credential.credential_id) };
+function statusName(value) {
+  return ({ 1: 'requested', 2: 'issued', 3: 'rejected', 4: 'revoked', 5: 'expired' })[value] || value;
 }
 
-// Orchestrates build → sign → submit. `signXDR(xdr)` is injected (Freighter in
-// the app, a stub in tests) so this is fully unit-testable without a wallet.
-export async function anchorCredentialOnChain({ sourcePublicKey, signXDR, credential }) {
-  const { xdr, fingerprint, dataName } = await buildAnchorTransactionXDR(sourcePublicKey, credential);
-
-  const signedXdr = await signXDR(xdr);
-  if (!signedXdr) throw new Error('transaction signing was rejected');
-
-  const server = horizonServer();
-  const signedTx = StellarSdk.TransactionBuilder.fromXDR(signedXdr, NETWORK_PASSPHRASE);
-  const result = await server.submitTransaction(signedTx);
-  return { hash: result.hash, fingerprint, dataName };
+function normalizeRecord(value) {
+  if (!value || typeof value !== 'object') return value;
+  return {
+    ...value,
+    credential_id: bytesHex(value.credential_id),
+    document_root: bytesHex(value.document_root),
+    schema_hash: bytesHex(value.schema_hash),
+    status: statusName(value.status),
+  };
 }
 
-// Best-effort read-back: fetch the anchored fingerprint from the account's data
-// entries and confirm it matches the credential. Used as a defense-in-depth
-// cross-check in the reader; failure here never invalidates the signature.
-export async function readOnChainAnchor(accountId, credential) {
-  const server = horizonServer();
-  const account = await server.loadAccount(accountId);
-  const name = anchorDataName(credential.credential_id);
-  const raw = account.data_attr?.[name]; // base64-encoded value
-  if (!raw) return { found: false };
-  const onChainHex = Buffer.from(raw, 'base64').toString('hex');
-  const expected = await credentialFingerprintHex(credential);
-  return { found: true, matches: onChainHex === expected, onChainHex, expected };
+function isCompleteAdapter(value) {
+  return Boolean(value && REQUIRED_ADAPTER_METHODS.every((name) => typeof value[name] === 'function'));
 }
+
+function unavailableClient(injected) {
+  const unavailable = async () => {
+    throw new Error('The SelyoPass contract client is not configured. Publish a reviewed testnet deployment before using chain actions.');
+  };
+  const client = {
+    configured: false,
+    contractId: injected?.contractId || 'Not published',
+    anchorContractId: injected?.anchorContractId || 'Not published',
+    rpcUrl: injected?.rpcUrl || deploymentManifest.rpcUrl,
+  };
+  for (const method of REQUIRED_ADAPTER_METHODS) client[method] = unavailable;
+  return client;
+}
+
+function injectedClient(injected) {
+  const client = {
+    configured: true,
+    contractId: injected.contractId || 'Not published',
+    anchorContractId: injected.anchorContractId || 'Not published',
+    rpcUrl: injected.rpcUrl || deploymentManifest.rpcUrl,
+  };
+  for (const method of REQUIRED_ADAPTER_METHODS) client[method] = injected[method].bind(injected);
+  return client;
+}
+
+function reasonCode(value) {
+  if (Number.isInteger(value) && value >= 0) return value;
+  if (REASON_CODES[value]) return REASON_CODES[value];
+  throw new Error('Reason code must be a documented non-negative integer.');
+}
+
+function eventType(value) {
+  return String(value || 'contract_event').replace(/^credential_/, '').toLowerCase();
+}
+
+function bytesHex(value) {
+  if (Buffer.isBuffer(value) || value instanceof Uint8Array) return Buffer.from(value).toString('hex');
+  return String(value || '');
+}
+
+export function createConfiguredContractClient(options = globalThis.__SELYOPASS_CONTRACT_CLIENT__) {
+  if (isCompleteAdapter(options)) return injectedClient(options);
+
+  const config = options?.deployment ? options : {};
+  const deployment = config.deployment || deploymentManifest;
+  const anchorId = deployment.contracts?.anchorRegistry?.id;
+  const credentialId = deployment.contracts?.credentialRegistry?.id;
+  const configured = deployment.status === 'deployed'
+    && CONTRACT_ID.test(anchorId || '')
+    && CONTRACT_ID.test(credentialId || '');
+  if (!configured) return unavailableClient(options);
+
+  const rpcUrl = deployment.rpcUrl || 'https://soroban-testnet.stellar.org';
+  const networkPassphrase = config.networkPassphrase || Networks.TESTNET;
+  const credentialFactory = config.credentialFactory
+    || ((clientOptions) => new CredentialRegistryClient(clientOptions));
+  const anchorFactory = config.anchorFactory
+    || ((clientOptions) => new AnchorRegistryClient(clientOptions));
+  const server = config.server || new rpc.Server(rpcUrl);
+  const transactionFromXdr = config.transactionFromXdr
+    || ((xdr) => TransactionBuilder.fromXDR(xdr, networkPassphrase));
+  const toNative = config.scValToNative || sdkScValToNative;
+  const sleep = config.sleep || ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)));
+
+  const base = (contractId, publicKey) => ({
+    contractId,
+    rpcUrl,
+    networkPassphrase,
+    ...(publicKey ? { publicKey } : {}),
+  });
+  const credentials = (publicKey) => credentialFactory(base(credentialId, publicKey));
+  const anchors = () => anchorFactory(base(anchorId));
+  const assemble = async (method, publicKey, args) => {
+    const transaction = await credentials(publicKey)[method](args);
+    return { unsignedXdr: transaction.toXDR() };
+  };
+  const read = async (method, args) => unwrap((await credentials()[method](args)).result);
+
+  return {
+    configured: true,
+    contractId: credentialId,
+    anchorContractId: anchorId,
+    rpcUrl,
+    request: async (subject, id, documentRoot, schemaHash, expiresLedger) => assemble(
+      'request',
+      subject,
+      {
+        subject,
+        credential_id: credentialIdBytes(id),
+        document_root: hexBytes(documentRoot, 'document root'),
+        schema_hash: hexBytes(schemaHash, 'schema hash'),
+        expires_ledger: expiresLedger,
+      },
+    ),
+    issue: async (issuer, id) => assemble('issue', issuer, {
+      issuer,
+      credential_id: credentialIdBytes(id),
+    }),
+    reject: async (issuer, id, code) => assemble('reject', issuer, {
+      issuer,
+      credential_id: credentialIdBytes(id),
+      reason_code: reasonCode(code),
+    }),
+    revoke: async (issuer, id, code) => assemble('revoke', issuer, {
+      issuer,
+      credential_id: credentialIdBytes(id),
+      reason_code: reasonCode(code),
+    }),
+    get: async (id) => normalizeRecord(await read('get', { credential_id: credentialIdBytes(id) })),
+    status: async (id) => statusName(await read('status', { credential_id: credentialIdBytes(id) })),
+    exists: async (id) => read('exists', { credential_id: credentialIdBytes(id) }),
+    is_authorized: async (anchor) => unwrap((await anchors().is_authorized({ anchor })).result),
+    submit: async (signedXdr) => {
+      const response = await server.sendTransaction(transactionFromXdr(signedXdr));
+      if (!['PENDING', 'DUPLICATE'].includes(response.status) || !response.hash) {
+        throw new Error(`RPC submission failed: ${response.status || 'unknown status'}`);
+      }
+      return { hash: response.hash };
+    },
+    confirm: async (transactionHash) => {
+      for (let attempt = 0; attempt < 20; attempt += 1) {
+        const response = await server.getTransaction(transactionHash);
+        if (response.status === 'SUCCESS') return response;
+        if (response.status === 'FAILED') return response;
+        if (attempt < 19) await sleep(1000);
+      }
+      throw new Error('RPC confirmation timeout.');
+    },
+    getEvents: async (startLedger) => {
+      let ledger = Number(startLedger);
+      if (!Number.isInteger(ledger) || ledger < 1) {
+        ledger = Math.max(1, (await server.getLatestLedger()).sequence - EVENT_RECOVERY_LEDGERS);
+      }
+      const response = await server.getEvents({
+        startLedger: ledger,
+        filters: [{ type: 'contract', contractIds: [credentialId] }],
+        limit: 100,
+      });
+      return {
+        events: response.events.map((event) => {
+          const topics = event.topic.map(toNative);
+          const value = toNative(event.value);
+          const normalizedValue = value && typeof value === 'object'
+            ? {
+              ...value,
+              document_root: bytesHex(value.document_root),
+              schema_hash: bytesHex(value.schema_hash),
+            }
+            : value;
+          return {
+            id: event.id,
+            ledger: event.ledger,
+            txHash: event.txHash,
+            type: eventType(topics[0]),
+            credentialId: bytesHex(topics[1] || value?.credential_id),
+            subject: bytesHex(topics[2] || value?.subject),
+            documentRoot: bytesHex(value?.document_root),
+            schemaHash: bytesHex(value?.schema_hash),
+            expiresLedger: value?.expires_ledger,
+            value: normalizedValue,
+          };
+        }),
+      };
+    },
+  };
+}
+
+export function isTransactionHash(transactionHash) {
+  return typeof transactionHash === 'string' && /^[a-f0-9]{64}$/i.test(transactionHash);
+}
+
+export const explorerTxUrl = (transactionHash) =>
+  isTransactionHash(transactionHash)
+    ? `https://stellar.expert/explorer/testnet/tx/${transactionHash}`
+    : null;

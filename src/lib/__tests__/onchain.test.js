@@ -1,40 +1,114 @@
-import { describe, it, expect } from 'vitest';
-import { buildAnchorValue, anchorDataName } from '../onchain.js';
-import { signCredential, credentialFingerprintHex } from '../credential.js';
-import { getSimulatedAnchorSecret } from '../anchorIdentity.js';
-import { validCredentialPayload } from './fixtures.js';
+import { Buffer } from 'buffer';
+import { describe, expect, it } from 'vitest';
+import {
+  CONTRACT_METHODS,
+  createConfiguredContractClient,
+  credentialIdBytes,
+  hexBytes,
+} from '../onchain.js';
 
-describe('on-chain anchor value (BR-002 — hash only, never documents/PII)', () => {
-  it('encodes exactly the 32-byte SHA-256 fingerprint', async () => {
-    const signed = signCredential(await validCredentialPayload(), getSimulatedAnchorSecret());
-    const fp = await credentialFingerprintHex(signed);
-    const value = buildAnchorValue(fp);
-    expect(value.length).toBe(32);
+const anchorId = 'CAAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQC526';
+const credentialId = 'CABAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAEAQCAIBAFNSZ';
+const deployment = {
+  schemaVersion: 1,
+  network: 'testnet',
+  status: 'deployed',
+  rpcUrl: 'https://rpc.example',
+  contracts: {
+    anchorRegistry: { id: anchorId },
+    credentialRegistry: { id: credentialId },
+  },
+};
+
+describe('Soroban contract adapter', () => {
+  it('exposes only the planned credential contract methods', () => {
+    expect(CONTRACT_METHODS).toEqual(['request', 'issue', 'reject', 'revoke', 'get', 'status', 'exists', 'is_authorized']);
   });
-
-  it('refuses anything that is not a clean 64-char hex hash (cannot leak data)', () => {
-    expect(() => buildAnchorValue('Acme Synthetic Test Corp')).toThrow();
-    expect(() => buildAnchorValue('')).toThrow();
-    expect(() => buildAnchorValue('xyz')).toThrow();
+  it('does not fabricate bindings when generated bindings are absent', async () => {
+    const client = createConfiguredContractClient({});
+    expect(client.configured).toBe(false);
+    await expect(client.issue('G', 'id')).rejects.toThrow(/not configured/i);
   });
-
-  it('the anchored value contains none of the credential PII fields', async () => {
-    const signed = signCredential(await validCredentialPayload(), getSimulatedAnchorSecret());
-    const fp = await credentialFingerprintHex(signed);
-    const valueStr = buildAnchorValue(fp).toString('latin1');
-    for (const pii of [
-      signed.organization.name,
-      signed.organization.director_name,
-      signed.organization.shareholder_name,
-    ]) {
-      expect(valueStr.includes(pii)).toBe(false);
-    }
+  it('accepts only a complete injected generated client', () => {
+    const injected = Object.fromEntries(CONTRACT_METHODS.map((name) => [name, async () => name]));
+    injected.getEvents = async () => [];
+    injected.submit = async () => ({});
+    injected.confirm = async () => ({});
+    const client = createConfiguredContractClient(injected);
+    expect(client.configured).toBe(true);
+    expect(client.contractId).toBe('Not published');
   });
-
-  it('builds a manageData name within the 64-byte limit', async () => {
-    const signed = signCredential(await validCredentialPayload(), getSimulatedAnchorSecret());
-    const name = anchorDataName(signed.credential_id);
-    expect(Buffer.byteLength(name, 'utf8')).toBeLessThanOrEqual(64);
-    expect(name.startsWith('selyopass:')).toBe(true);
+  it('derives stable BytesN values and rejects malformed public hashes', async () => {
+    expect((await credentialIdBytes('SP-001')).length).toBe(32);
+    expect(Buffer.from(await credentialIdBytes('SP-001')).toString('hex'))
+      .toBe(Buffer.from(await credentialIdBytes('SP-001')).toString('hex'));
+    expect(() => hexBytes('not-a-hash', 'document root')).toThrow(/document root/i);
+  });
+  it('uses generated clients to simulate writes and unwrap reads', async () => {
+    const calls = [];
+    const assembled = { toXDR: () => 'unsigned-xdr', result: { unwrap: () => ({ status: 1 }) } };
+    const credentialFactory = (options) => ({
+      request: async (args) => { calls.push({ options, args }); return assembled; },
+      get: async () => assembled,
+      status: async () => ({ result: { unwrap: () => 1 } }),
+      exists: async () => ({ result: true }),
+    });
+    const anchorFactory = () => ({
+      is_authorized: async () => ({ result: true }),
+    });
+    const client = createConfiguredContractClient({
+      deployment,
+      credentialFactory,
+      anchorFactory,
+      server: {},
+    });
+    const result = await client.request(
+      'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+      'SP-001',
+      '11'.repeat(32),
+      '22'.repeat(32),
+      123,
+    );
+    expect(result.unsignedXdr).toBe('unsigned-xdr');
+    expect(calls[0].options.publicKey).toMatch(/^G/);
+    expect(calls[0].args.credential_id).toHaveLength(32);
+    await expect(client.get('SP-001')).resolves.toMatchObject({ status: 'requested' });
+    await expect(client.status('SP-001')).resolves.toBe('requested');
+    await expect(client.exists('SP-001')).resolves.toBe(true);
+    await expect(client.is_authorized('GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF')).resolves.toBe(true);
+  });
+  it('submits signed XDR, confirms it, and normalizes contract events', async () => {
+    const server = {
+      sendTransaction: async () => ({ status: 'PENDING', hash: 'a'.repeat(64) }),
+      getTransaction: async () => ({ status: 'SUCCESS', ledger: 456 }),
+      getEvents: async () => ({
+        events: [{
+          id: '0001-1',
+          ledger: 455,
+          txHash: 'b'.repeat(64),
+          topic: ['issued', Buffer.alloc(32, 3)],
+          value: { issuer: 'GISSUER' },
+        }],
+      }),
+    };
+    const client = createConfiguredContractClient({
+      deployment,
+      credentialFactory: () => ({}),
+      anchorFactory: () => ({}),
+      server,
+      transactionFromXdr: (xdr) => ({ xdr }),
+      scValToNative: (value) => value,
+    });
+    await expect(client.submit('signed-xdr')).resolves.toEqual({ hash: 'a'.repeat(64) });
+    await expect(client.confirm('a'.repeat(64))).resolves.toMatchObject({ status: 'SUCCESS', ledger: 456 });
+    await expect(client.getEvents(400)).resolves.toEqual({
+      events: [expect.objectContaining({
+        id: '0001-1',
+        ledger: 455,
+        type: 'issued',
+        credentialId: '03'.repeat(32),
+        txHash: 'b'.repeat(64),
+      })],
+    });
   });
 });
