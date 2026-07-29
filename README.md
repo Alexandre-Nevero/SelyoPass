@@ -1,172 +1,89 @@
 # SelyoPass
 
-> **One verified mark. Open doors everywhere.**
+SelyoPass is a testnet prototype for carrying portable Philippine KYB evidence between a startup, a simulated anchor, and a relying institution. It is a **secure data courier, not a compliance stamp**: it can prove record integrity and provenance, but every institution still makes its own KYB decision.
 
-## Overview
+## Current status
 
-SelyoPass is a portable Know Your Business (KYB) credential platform built on the Stellar blockchain.
+This branch contains the recovery implementation for the June 30 Stellar Level 3 + APAC submission:
 
-Early-stage Philippine startups face fragmented and repetitive KYB onboarding when integrating with banks, payment gateways, and other regulated financial institutions. Every institution requires nearly identical business documents — SEC registration, BIR certificate, Mayor's Permit, Articles of Incorporation, beneficial ownership disclosure — and each runs an independent intake cycle even though they are verifying the same legal entity. The result is weeks of compounded delay before each integration goes live.
+- two Soroban contracts on protocol 27: Anchor Registry and Credential Registry;
+- startup-authorized requests and registry-authorized issue/reject/revoke actions;
+- real cross-contract anchor authorization and typed contract events;
+- generated TypeScript bindings checked against optimized release WASMs;
+- Freighter and Albedo through Stellar Wallets Kit 2.5.0;
+- local document hashing, hash-only public payloads, and wallet-free verification;
+- explicit transaction and evidence states;
+- Vitest, Rust, release-WASM, Playwright, accessibility, documentation, and manifest checks.
 
-SelyoPass lets a startup get verified once by a regulated Stellar anchor and present a signed, structured, independently verifiable credential to every future bank, payment partner, or marketplace. Institutions skip the document collection step and complete their compliance work faster while keeping full decision authority. **SelyoPass is a secure data courier, not a compliance stamp** — it removes the document collection step, never the institution's compliance judgment.
+No reviewed deployment of these recovery contracts exists yet. [deployments/testnet.json](./deployments/testnet.json) is deliberately marked `not_deployed`; no contract ID, transaction hash, live demo, or submission evidence is claimed until the protected release workflow produces it. The simulated anchor has no secret in this repository or browser bundle.
 
-This branch is the **Stellar Level 3**: the full issue → anchor → verify credential loop on Stellar testnet.
+## Product routes
 
-**Live demo:** [https://selyo-pass.vercel.app](https://selyo-pass.vercel.app)
+- `#/prepare` — hash synthetic files locally, review the public payload, connect Freighter or Albedo, and request a credential.
+- `#/anchor` — explicitly labelled simulated-anchor console for authorized testnet issue/reject/revoke actions.
+- `#/verify` — wallet-free local and on-chain integrity checks.
 
-**Demo video:** [https://www.loom.com/share/032a6732310c48e0afc5cc8d71b96ad7](https://www.loom.com/share/032a6732310c48e0afc5cc8d71b96ad7)
+The root screen routes people to preparation or verification. GitHub Pages uses hash routes so refreshes do not require a server rewrite.
 
-### MVP capabilities
+## Architecture
 
-| ID | Capability |
-|----|-----------|
-| **F-001** | SEP-12-extended KYB credential schema for PH business documents (SEC, BIR, Mayor's Permit, Articles of Incorporation, GIS) + beneficial-ownership (UBO) fields |
-| **F-002** | Anchor-issued, **ed25519-signed** credential; the credential **hash is anchored on Stellar testnet** |
-| **F-003** | Documents are **hashed locally** (SHA-256) — only the hash is recorded; SelyoPass never stores documents |
-| **F-004** | Relying-party reader: verifies the anchor signature and re-checks document hashes |
-| **F-005** | Mobile-responsive issuance + verification views |
-| **F-006** | Error and loading states across wallet connect, issuance, and verification |
+The browser SPA has no SelyoPass backend or database.
 
-### How it works
+1. The startup hashes synthetic documents locally.
+2. Credential Registry stores only the subject address, credential ID hash, document root, schema hash, status, issuer, reason code, and ledger metadata.
+3. Issue/reject/revoke requires issuer authorization; issuance calls Anchor Registry to prove the issuer is currently authorized.
+4. The relying party re-hashes presented files and checks registry record, issuer authorization, lifecycle status, and issuance-event evidence independently.
 
-1. **Issue (startup).** Fill the KYB form and attach documents. Each document is hashed in your
-   browser. The simulated anchor signs the credential (ed25519). You can download the credential
-   JSON and anchor its hash on Stellar testnet via Freighter.
-2. **Anchor (on-chain).** A single `manageData` transaction records **only** the 32-byte credential
-   fingerprint on testnet — never documents or personal data. You get a transaction hash.
-3. **Verify (relying party).** Paste the credential, present the documents again, and the reader
-   verifies the anchor's signature and that every presented document still matches its anchored
-   hash. The result states what was cryptographically verified — not a "trust-this-business" stamp.
+Document bytes, organization names, registration numbers, and beneficial-owner data must never go on-chain. Testnet fixtures must remain synthetic.
 
----
+## Prerequisites
 
-## Everything here is free
+- Node.js 22.23.0
+- npm
+- Rust 1.96.0 with `rustfmt`, `clippy`, and `wasm32v1-none`
+- Stellar CLI 27.0.0 for binding and contract-release work
+- Freighter or Albedo on Stellar Testnet for authorized browser actions
 
-No paid APIs, no freemium, no hosted services:
-
-- **Stellar testnet** + **Friendbot** — free
-- **Freighter** wallet — free
-- **SHA-256** via the browser's built-in Web Crypto API — no library, no service
-- **ed25519** signing/verification via `@stellar/stellar-sdk` — free
-- **Vitest** (tests) and **GitHub Actions** (CI) — free / open source
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 + Vite 5 |
-| Blockchain | Stellar Testnet (`@stellar/stellar-sdk`) |
-| Wallet | Freighter (`@stellar/freighter-api`) |
-| Hashing | Web Crypto API (SHA-256) |
-| Signing | ed25519 (Stellar keypair) |
-| Tests / CI | Vitest / GitHub Actions |
-
----
-
-## Setup
-
-### Prerequisites
-
-- **Node.js** v18+ and **npm**
-- **Freighter** browser extension ([install](https://www.freighter.app/)), set to **Testnet**
-- A funded testnet account ([Friendbot](https://friendbot.stellar.org/)) — needed only to anchor on-chain
-
-### Install & run
+## Run and verify
 
 ```bash
-git clone https://github.com/Alexandre-Nevero/SelyoPass.git
-cd SelyoPass
-npm install
-npm run dev        # http://localhost:5173
+npm ci
+npm run dev
 ```
-
-### Test & build
 
 ```bash
-npm run test:run   # run the unit test suite once
-npm test           # watch mode
-npm run build      # production build → dist/
+npm run lint
+npm run typecheck
+npm run test:run
+npm run build
+npm run test:e2e
+npm run test:manifests
 ```
 
----
-
-## Usage
-
-**Issue a credential (startup):** open the **Issue** tab, fill the company + UBO fields, attach the
-five documents (hashed locally), and click **Issue Credential**. Download the JSON, then optionally
-**Connect Freighter** and **Anchor hash on Stellar testnet** for an on-chain record + tx hash.
-
-**Verify a credential (relying party):** open the **Verify** tab, load/paste the credential JSON,
-present the documents, and click **Verify Credential**. The reader checks the anchor signature and
-the document hashes and shows a per-check result.
-
----
-
-## Important notes (scope & honesty)
-
-- **The anchor is simulated.** For the MVP the regulated anchor (e.g. PDAX) is simulated by a
-  throwaway **testnet** keypair (see `src/lib/anchorIdentity.js`). Signature/issuance tests prove the
-  mechanism against a synthetic issuer — not that a real regulated anchor participates. Real
-  issuer-key custody is an open question (see `docs/12-security-compliance.md`).
-- **On-chain anchoring uses a classic `manageData` transaction, not a Soroban contract (yet).** The
-  docs target a Soroban smart contract for F-002; the on-chain layer is isolated in
-  `src/lib/onchain.js` so a Soroban contract can replace it without touching the rest. The
-  credential's trust (the ed25519 anchor signature) is unchanged either way.
-- **Testnet only. Synthetic data only.** No mainnet, no real corporate data or beneficial-owner PII
-  (BR-006).
-
-### On-chain artifact (testnet)
-
-**Soroban smart contract (F-002):**
-
-- **Contract address:** [`CBPJJP67GZ6LAQCDWG6JLO4QJQJ2BK3WXX3TA7VLSJW6BU4CHPR2ODW6`](https://stellar.expert/explorer/testnet/contract/CBPJJP67GZ6LAQCDWG6JLO4QJQJ2BK3WXX3TA7VLSJW6BU4CHPR2ODW6)
-- **Deploy tx:** [`f66fded0c91adb234bb579507194f2ca2bea4ecf881da8e8bf7c513e6f324ec2`](https://stellar.expert/explorer/testnet/tx/f66fded0c91adb234bb579507194f2ca2bea4ecf881da8e8bf7c513e6f324ec2)
-- **Interaction tx (issue):** [`640426230726c1250db44ba441c1a848b35fcda5481be375ad3ca1fcd0d45e4b`](https://stellar.expert/explorer/testnet/tx/640426230726c1250db44ba441c1a848b35fcda5481be375ad3ca1fcd0d45e4b)
-- **Deployer account:** [`GAO7LVRRR6TVNX34M5CHOZX6DF25XNLUXBCBBZH2LFCKG3FKF3GRP2VS`](https://stellar.expert/explorer/testnet/account/GAO7LVRRR6TVNX34M5CHOZX6DF25XNLUXBCBBZH2LFCKG3FKF3GRP2VS)
-
-**Classic anchoring (manageData):**
-
-- **Interaction tx hash:** [`3ec971accbb9b788fee6d4c2ac142b022c6abd6ea21667777fdd12a54e58c350`](https://stellar.expert/explorer/testnet/tx/3ec971accbb9b788fee6d4c2ac142b022c6abd6ea21667777fdd12a54e58c350)
-- **Anchoring account:** [`GBGGWBUTTJCQAQRF6DI3T4WKPSVWHZMWGAAKBWHNOG6BEKJMQD3PQXLT`](https://stellar.expert/explorer/testnet/account/GBGGWBUTTJCQAQRF6DI3T4WKPSVWHZMWGAAKBWHNOG6BEKJMQD3PQXLT)
-- **Data entry:** `selyopass:selyo-demo-level3` → 32-byte SHA-256 credential fingerprint
-
-See [`docs/`](./docs) for the full PRD, system design, data model, QA plan, and security/compliance
-analysis.
-
----
-
-## Project Structure
-
-```
-SelyoPass/
-├── .github/workflows/ci.yml      # free CI: test + build
-├── docs/                         # PRD, system design, data model, QA, security
-├── index.html
-├── package.json
-├── vite.config.js
-├── vitest.config.js
-├── src/
-│   ├── main.jsx
-│   ├── App.jsx                   # shell: connect + Issue/Verify tabs
-│   ├── App.css
-│   ├── components/
-│   │   ├── IssuerView.jsx        # F-001/F-002/F-003 issuance
-│   │   └── ReaderView.jsx        # F-004 verification
-│   └── lib/
-│       ├── schema.js             # F-001 KYB schema + validation
-│       ├── hash.js               # F-003 SHA-256 (Web Crypto)
-│       ├── canonical.js          # deterministic serialization
-│       ├── credential.js         # F-002/F-004 sign + verify (ed25519)
-│       ├── onchain.js            # F-002 on-chain hash anchoring (BR-002)
-│       ├── anchorIdentity.js     # simulated testnet anchor
-│       ├── wallet.js             # Freighter wrapper
-│       ├── stellar.js            # testnet config
-│       └── __tests__/            # Vitest unit tests
-└── README.md
+```bash
+cargo fmt --manifest-path contracts/Cargo.toml --all -- --check
+cargo test --manifest-path contracts/Cargo.toml --workspace
+cargo clippy --manifest-path contracts/Cargo.toml --workspace --all-targets -- -D warnings
+cargo build --manifest-path contracts/Cargo.toml --workspace --release --target wasm32v1-none
+STELLAR_CLI=stellar npm run check:bindings
 ```
 
----
+`contracts/deploy.sh` deploys Anchor Registry first, then Credential Registry, registers the simulated issuer, and exercises one synthetic lifecycle. It reads a named identity from the Stellar CLI key store; it never reads or prints the secret. Do not run it against mainnet.
+
+## Documentation
+
+- [Product and engineering document index](./docs/index.md)
+- [Product design authority](./DESIGN.md)
+- [PRD](./docs/prd.md)
+- [Technical design](./docs/technical-design.md)
+- [QA test plan](./docs/qa-test-plan.md)
+- [Security and compliance](./docs/security-compliance.md)
+- [Build and release guide](./docs/BUILD.md)
+- [Operations runbook](./docs/ops.md)
+- [Submission draft](./submission/evidence.json)
+
+The organizer rubric, institution acceptance, willingness to pay, and pain generalization beyond the original interview remain unvalidated. Level 4-specific development is blocked until written Stellar Builder Team approval is recorded.
 
 ## License
 
-Open source under the [LICENSE](./LICENSE) file.
+See [LICENSE](./LICENSE).

@@ -5,8 +5,8 @@
 
       CERTIFICATE OF REGISTRATION (BIR Form 2303)
 
-Taxpayer: DSERVE TECHNOLOGIES INC.
-TIN: 999-999-999-000   ← TAMPERED (original was 123-456-789-000)
+Taxpayer: KATHA LEDGER LABS INC.
+TIN: 999-999-999-000   ← TAMPERED (original was 000-000-000-000)
 RDO: Revenue District Office No. 39 - South Quezon City
 
 Date of Registration: March 20, 2024
@@ -14,8 +14,8 @@ Line of Business: Information Technology Services
 Tax Types Registered: Income Tax, VAT, Withholding Tax
 
 Registered Address:
-  Unit 501, Tech Hub Building
-  123 Innovation Street, Quezon City
+  Unit 0, Synthetic Test Building
+  1 Testnet Avenue, Fiction City
   Metro Manila, Philippines
 
 ═══════════════════════════════════════════════════════════════

@@ -6,10 +6,10 @@
            MAYOR'S / BUSINESS PERMIT
 
 Permit No.: BP-2024-QC-087654
-Issued to: DSERVE TECHNOLOGIES INC.
+Issued to: KATHA LEDGER LABS INC.
 Business Address:
-  Unit 501, Tech Hub Building
-  123 Innovation Street, Quezon City
+  Unit 0, Synthetic Test Building
+  1 Testnet Avenue, Fiction City
 
 Nature of Business: Information Technology Services
 Capital Investment: PHP 250,000.00
