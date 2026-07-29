@@ -1,0 +1,109 @@
+name: Protected testnet contract release
+
+on:
+  workflow_dispatch:
+    inputs:
+      expires_ledger:
+        description: Future Stellar Testnet ledger for the synthetic release check
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  checks: read
+
+env:
+  STELLAR_CLI_VERSION: 27.0.0
+
+jobs:
+  gate:
+    name: Verify main release source and CI
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require main and green recovery CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "${GITHUB_REF}" = "refs/heads/main"
+          checks="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/check-runs")"
+          for name in \
+            "FMD validation" \
+            "Frontend static and unit" \
+            "Contracts and bindings" \
+            "Local Quickstart integration" \
+            "Browser and accessibility" \
+            "Security and workflow policy"; do
+            result="$(jq -r --arg name "$name" \
+              '[.check_runs[] | select(.name == $name and .conclusion == "success")] | length' \
+              <<<"$checks")"
+            test "$result" -ge 1
+          done
+
+  release:
+    name: Deploy and produce review candidate
+    needs: gate
+    runs-on: ubuntu-24.04
+    environment: testnet-release
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: dtolnay/rust-toolchain@2c7215f132e9ebf062739d9130488b56d53c060c
+        with:
+          toolchain: 1.96.0
+          targets: wasm32v1-none
+      - name: Install pinned Stellar CLI
+        run: |
+          curl -fsSLo stellar-cli.tar.gz \
+            https://github.com/stellar/stellar-cli/releases/download/v27.0.0/stellar-cli-27.0.0-x86_64-unknown-linux-gnu.tar.gz
+          echo "357bf712f6353c28cd33c794402a3c87231757a5b305e6ef1604365af4fdd556  stellar-cli.tar.gz" | sha256sum -c -
+          sudo tar -xzf stellar-cli.tar.gz -C /usr/local/bin
+      - name: Import protected role-separated identities
+        env:
+          STELLAR_TESTNET_ADMIN_SECRET: ${{ secrets.STELLAR_TESTNET_ADMIN_SECRET }}
+          STELLAR_TESTNET_ANCHOR_SECRET: ${{ secrets.STELLAR_TESTNET_ANCHOR_SECRET }}
+          STELLAR_TESTNET_SUBJECT_SECRET: ${{ secrets.STELLAR_TESTNET_SUBJECT_SECRET }}
+        run: |
+          test -n "$STELLAR_TESTNET_ADMIN_SECRET"
+          test -n "$STELLAR_TESTNET_ANCHOR_SECRET"
+          test -n "$STELLAR_TESTNET_SUBJECT_SECRET"
+          printf '%s\n' "$STELLAR_TESTNET_ADMIN_SECRET" | stellar keys add selyopass-admin --secret-key
+          printf '%s\n' "$STELLAR_TESTNET_ANCHOR_SECRET" | stellar keys add selyopass-anchor --secret-key
+          printf '%s\n' "$STELLAR_TESTNET_SUBJECT_SECRET" | stellar keys add selyopass-subject --secret-key
+          unset STELLAR_TESTNET_ADMIN_SECRET STELLAR_TESTNET_ANCHOR_SECRET STELLAR_TESTNET_SUBJECT_SECRET
+          {
+            stellar keys address selyopass-admin
+            stellar keys address selyopass-anchor
+            stellar keys address selyopass-subject
+          } > release-addresses.txt
+      - name: Build, deploy, register, request, and issue
+        env:
+          SELYOPASS_EXPIRES_LEDGER: ${{ inputs.expires_ledger }}
+          STELLAR_ADMIN_IDENTITY: selyopass-admin
+          STELLAR_ANCHOR_IDENTITY: selyopass-anchor
+          STELLAR_SUBJECT_IDENTITY: selyopass-subject
+          STELLAR_NETWORK: testnet
+          SELYOPASS_DEPLOYMENT_CANDIDATE: ${{ github.workspace }}/deployments/testnet.candidate.json
+          SELYOPASS_SOURCE_SHA: ${{ github.sha }}
+        run: |
+          bash contracts/deploy.sh | tee release-output.txt
+          grep -Eq 'Anchor Registry: C[A-Z2-7]{55}' release-output.txt
+          grep -Eq 'Credential Registry: C[A-Z2-7]{55}' release-output.txt
+          sha256sum contracts/target/wasm32v1-none/release/*.wasm | tee wasm-sha256.txt
+          node scripts/validate-manifests.mjs --deployment-file deployments/testnet.candidate.json
+      - name: Record immutable release metadata
+        run: |
+          {
+            echo "release_sha=${GITHUB_SHA}"
+            echo "run_url=https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "released_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > release-metadata.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: testnet-release-review-candidate
+          path: |
+            contracts/target/wasm32v1-none/release/*.wasm
+            release-addresses.txt
+            release-output.txt
+            release-metadata.txt
+            wasm-sha256.txt
+            deployments/testnet.candidate.json
+          if-no-files-found: error
