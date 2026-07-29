@@ -54,20 +54,6 @@ export function buildCredential({ organization, beneficialOwners, documentHashes
   };
 }
 
-// F-002 — the (simulated) anchor signs the canonical payload with ed25519.
-export function signCredential(payload, anchorSecret) {
-  const kp = Keypair.fromSecret(anchorSecret);
-  if (payload.anchor?.public_key && payload.anchor.public_key !== kp.publicKey()) {
-    throw new Error('anchor.public_key in the payload does not match the signing key');
-  }
-  const message = canonicalMessage(payload);
-  const signature = kp.sign(message); // Buffer (ed25519 detached signature)
-  return {
-    ...payload,
-    signature: signature.toString('base64'),
-  };
-}
-
 // Adds the credential fingerprint (hash of the signed credential) — this is the
 // value anchored on-chain (it is a hash, never document bytes; BR-002).
 export async function withFingerprint(signedCredential) {
@@ -85,7 +71,7 @@ export function verifyCredentialSignature(credential, trustedAnchorPublicKey) {
   if (!anchorKey) return { valid: false, reason: 'credential has no anchor public key' };
   if (!credential.signature) return { valid: false, reason: 'credential is not signed' };
 
-  let signatureOk = false;
+  let signatureOk;
   try {
     const kp = Keypair.fromPublicKey(anchorKey);
     const message = canonicalMessage(credential);
