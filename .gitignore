@@ -10,4 +10,14 @@ ltm/snapshots/*
 
 # Rust build artifacts
 contracts/*/target/
+/contracts/target/
+/deployments/*.candidate.json
 dist/
+
+# Local workflow sources are preserved outside repository history.
+/fmd/
+/FMD/
+/.agents/skills/
+/.fmd-ci/
+/test-results/
+/playwright-report/

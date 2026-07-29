@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "skills": {
+    "refero-design": {
+      "source": "https://github.com/referodesign/refero_skill",
+      "sourceType": "github",
+      "resolvedCommit": "f78b4eccf112d7a179b92afeafdd7e8684560ac2",
+      "skillPath": "SKILL.md",
+      "license": "MIT",
+      "installation": "local-only",
+      "liveMcp": "excluded-paid",
+      "computedHash": "31a559a556a0bba06320f709041acaf5b9418d5cc136f7d3ae120850eef794b0"
+    },
+    "agentic-payments": {
+      "source": "stellar/stellar-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/agentic-payments/SKILL.md",
+      "computedHash": "dbf09a3d36ecac9a4f0c426c0dc6709f6948f7e99a88e00095dfc9dc3b6f6849"
+    },
+    "assets": {
+      "source": "stellar/stellar-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/assets/SKILL.md",
+      "computedHash": "5b52e48db8064ab99a7ea792d1de7d87ecf2c02ab7362c5281faa266675e43ef"
+    },
+    "dapp": {
+      "source": "stellar/stellar-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/dapp/SKILL.md",
+      "computedHash": "aafa86c1290377ea49748fe948261818a9560621b86022bdb1ed7dc9f0e4ff86"
+    },
+    "data": {
+      "source": "stellar/stellar-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/data/SKILL.md",
+      "computedHash": "46820282be23a59d9ce9c48916fd8c734e668f5157c83fba4f009bae30254245"
+    },
+    "smart-contracts": {
+      "source": "stellar/stellar-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/smart-contracts/SKILL.md",
+      "computedHash": "aba62562e3c7dfb08067d05008a9c3da4ecc8dcd7f48472be2c2db250889365c"
+    },
+    "standards": {
+      "source": "stellar/stellar-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/standards/SKILL.md",
+      "computedHash": "44e5d82531d034f581cef2c7c470b75cb94e0cc8a978ee9e17d342df213bb177"
+    },
+    "zk-proofs": {
+      "source": "stellar/stellar-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/zk-proofs/SKILL.md",
+      "computedHash": "24c59fbf758277022979d07c7838023fe41487f6dea12c48e343963c5a5f778e"
+    }
+  }
+}
