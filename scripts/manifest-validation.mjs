@@ -40,7 +40,9 @@ export function validateDeploymentManifest(manifest, { requireDeployed = false }
   ) {
     errors.push('contract IDs must be distinct');
   }
-  for (const name of ['anchorRegistrationTxHash', 'requestTxHash', 'issueTxHash']) {
+  for (const name of [
+    'anchorRegistrationTxHash', 'requestTxHash', 'issueTxHash', 'refreshRequestTxHash', 'refreshIssueTxHash',
+  ]) {
     requireMatch(errors, `interactions.${name}`, manifest.interactions?.[name], HEX64);
   }
   return errors;

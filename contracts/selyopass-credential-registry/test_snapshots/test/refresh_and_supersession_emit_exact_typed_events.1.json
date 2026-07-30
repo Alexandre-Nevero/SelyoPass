@@ -42,72 +42,16 @@
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                 },
                 {
-                  "bytes": "2121212121212121212121212121212121212121212121212121212121212121"
+                  "bytes": "4747474747474747474747474747474747474747474747474747474747474747"
                 },
                 {
-                  "bytes": "2323232323232323232323232323232323232323232323232323232323232323"
+                  "bytes": "5151515151515151515151515151515151515151515151515151515151515151"
                 },
                 {
-                  "bytes": "2424242424242424242424242424242424242424242424242424242424242424"
+                  "bytes": "5252525252525252525252525252525252525252525252525252525252525252"
                 },
                 {
-                  "u32": 20
-                }
-              ]
-            }
-          },
-          "sub_invocations": []
-        }
-      ]
-    ],
-    [
-      [
-        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-        {
-          "function": {
-            "contract_fn": {
-              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
-              "function_name": "reject",
-              "args": [
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                },
-                {
-                  "bytes": "2121212121212121212121212121212121212121212121212121212121212121"
-                },
-                {
-                  "u32": 1
-                }
-              ]
-            }
-          },
-          "sub_invocations": []
-        }
-      ]
-    ],
-    [
-      [
-        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
-        {
-          "function": {
-            "contract_fn": {
-              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
-              "function_name": "request",
-              "args": [
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
-                },
-                {
-                  "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
-                },
-                {
-                  "bytes": "2525252525252525252525252525252525252525252525252525252525252525"
-                },
-                {
-                  "bytes": "2626262626262626262626262626262626262626262626262626262626262626"
-                },
-                {
-                  "u32": 20
+                  "u32": 100
                 }
               ]
             }
@@ -129,7 +73,41 @@
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
+                  "bytes": "4747474747474747474747474747474747474747474747474747474747474747"
+                }
+              ]
+            }
+          },
+          "sub_invocations": []
+        }
+      ]
+    ],
+    [
+      [
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+        {
+          "function": {
+            "contract_fn": {
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
+              "function_name": "request_refresh",
+              "args": [
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                },
+                {
+                  "bytes": "4848484848484848484848484848484848484848484848484848484848484848"
+                },
+                {
+                  "bytes": "4747474747474747474747474747474747474747474747474747474747474747"
+                },
+                {
+                  "bytes": "5151515151515151515151515151515151515151515151515151515151515151"
+                },
+                {
+                  "bytes": "5252525252525252525252525252525252525252525252525252525252525252"
+                },
+                {
+                  "u32": 200
                 }
               ]
             }
@@ -145,16 +123,13 @@
           "function": {
             "contract_fn": {
               "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
-              "function_name": "revoke",
+              "function_name": "issue",
               "args": [
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
-                },
-                {
-                  "u32": 2
+                  "bytes": "4848484848484848484848484848484848484848484848484848484848484848"
                 }
               ]
             }
@@ -162,13 +137,11 @@
           "sub_invocations": []
         }
       ]
-    ],
-    [],
-    []
+    ]
   ],
   "ledger": {
     "protocol_version": 27,
-    "sequence_number": 21,
+    "sequence_number": 0,
     "timestamp": 0,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
     "base_reserve": 0,
@@ -226,26 +199,6 @@
               "key": {
                 "ledger_key_nonce": {
                   "nonce": "2032731177588607455"
-                }
-              },
-              "durability": "temporary",
-              "val": "void"
-            }
-          },
-          "ext": "v0"
-        },
-        "live_until": 6311999
-      },
-      {
-        "entry": {
-          "last_modified_ledger_seq": 0,
-          "data": {
-            "contract_data": {
-              "ext": "v0",
-              "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-              "key": {
-                "ledger_key_nonce": {
-                  "nonce": "4270020994084947596"
                 }
               },
               "durability": "temporary",
@@ -372,7 +325,7 @@
                     "symbol": "Credential"
                   },
                   {
-                    "bytes": "2121212121212121212121212121212121212121212121212121212121212121"
+                    "bytes": "4747474747474747474747474747474747474747474747474747474747474747"
                   }
                 ]
               },
@@ -384,7 +337,7 @@
                       "symbol": "credential_id"
                     },
                     "val": {
-                      "bytes": "2121212121212121212121212121212121212121212121212121212121212121"
+                      "bytes": "4747474747474747474747474747474747474747474747474747474747474747"
                     }
                   },
                   {
@@ -392,7 +345,7 @@
                       "symbol": "document_root"
                     },
                     "val": {
-                      "bytes": "2323232323232323232323232323232323232323232323232323232323232323"
+                      "bytes": "5151515151515151515151515151515151515151515151515151515151515151"
                     }
                   },
                   {
@@ -400,7 +353,7 @@
                       "symbol": "expires_ledger"
                     },
                     "val": {
-                      "u32": 20
+                      "u32": 100
                     }
                   },
                   {
@@ -421,9 +374,7 @@
                     "key": {
                       "symbol": "reason_code"
                     },
-                    "val": {
-                      "u32": 1
-                    }
+                    "val": "void"
                   },
                   {
                     "key": {
@@ -446,7 +397,7 @@
                       "symbol": "schema_hash"
                     },
                     "val": {
-                      "bytes": "2424242424242424242424242424242424242424242424242424242424242424"
+                      "bytes": "5252525252525252525252525252525252525252525252525252525252525252"
                     }
                   },
                   {
@@ -454,7 +405,7 @@
                       "symbol": "status"
                     },
                     "val": {
-                      "u32": 3
+                      "u32": 6
                     }
                   },
                   {
@@ -469,7 +420,9 @@
                     "key": {
                       "symbol": "successor_credential_id"
                     },
-                    "val": "void"
+                    "val": {
+                      "bytes": "4848484848484848484848484848484848484848484848484848484848484848"
+                    }
                   },
                   {
                     "key": {
@@ -508,7 +461,7 @@
                     "symbol": "Credential"
                   },
                   {
-                    "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
+                    "bytes": "4848484848484848484848484848484848484848484848484848484848484848"
                   }
                 ]
               },
@@ -520,7 +473,7 @@
                       "symbol": "credential_id"
                     },
                     "val": {
-                      "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
+                      "bytes": "4848484848484848484848484848484848484848484848484848484848484848"
                     }
                   },
                   {
@@ -528,7 +481,7 @@
                       "symbol": "document_root"
                     },
                     "val": {
-                      "bytes": "2525252525252525252525252525252525252525252525252525252525252525"
+                      "bytes": "5151515151515151515151515151515151515151515151515151515151515151"
                     }
                   },
                   {
@@ -536,7 +489,7 @@
                       "symbol": "expires_ledger"
                     },
                     "val": {
-                      "u32": 20
+                      "u32": 200
                     }
                   },
                   {
@@ -551,15 +504,15 @@
                     "key": {
                       "symbol": "previous_credential_id"
                     },
-                    "val": "void"
+                    "val": {
+                      "bytes": "4747474747474747474747474747474747474747474747474747474747474747"
+                    }
                   },
                   {
                     "key": {
                       "symbol": "reason_code"
                     },
-                    "val": {
-                      "u32": 2
-                    }
+                    "val": "void"
                   },
                   {
                     "key": {
@@ -582,7 +535,7 @@
                       "symbol": "schema_hash"
                     },
                     "val": {
-                      "bytes": "2626262626262626262626262626262626262626262626262626262626262626"
+                      "bytes": "5252525252525252525252525252525252525252525252525252525252525252"
                     }
                   },
                   {
@@ -590,7 +543,7 @@
                       "symbol": "status"
                     },
                     "val": {
-                      "u32": 4
+                      "u32": 2
                     }
                   },
                   {
@@ -683,5 +636,84 @@
       }
     ]
   },
-  "events": []
+  "events": [
+    {
+      "event": {
+        "ext": "v0",
+        "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
+        "type_": "contract",
+        "body": {
+          "v0": {
+            "topics": [
+              {
+                "symbol": "credential_issued"
+              },
+              {
+                "bytes": "4848484848484848484848484848484848484848484848484848484848484848"
+              },
+              {
+                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+              }
+            ],
+            "data": {
+              "map": [
+                {
+                  "key": {
+                    "symbol": "issued_ledger"
+                  },
+                  "val": {
+                    "u32": 0
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "failed_call": false
+    },
+    {
+      "event": {
+        "ext": "v0",
+        "contract_id": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
+        "type_": "contract",
+        "body": {
+          "v0": {
+            "topics": [
+              {
+                "symbol": "credential_superseded"
+              },
+              {
+                "bytes": "4747474747474747474747474747474747474747474747474747474747474747"
+              },
+              {
+                "bytes": "4848484848484848484848484848484848484848484848484848484848484848"
+              }
+            ],
+            "data": {
+              "map": [
+                {
+                  "key": {
+                    "symbol": "issuer"
+                  },
+                  "val": {
+                    "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                  }
+                },
+                {
+                  "key": {
+                    "symbol": "superseded_ledger"
+                  },
+                  "val": {
+                    "u32": 0
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "failed_call": false
+    }
+  ]
 }

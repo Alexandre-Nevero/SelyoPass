@@ -1,7 +1,7 @@
 ---
 schema_version: 2.1.0
 status: draft
-last_updated: 2026-07-29
+last_updated: 2026-07-30
 doc: qa-test-plan
 owns: test intent and the traceability sink · the automation contract (path, command, trigger) · regression and exit criteria
 ---
@@ -58,7 +58,7 @@ deployment manifest, Pages smoke, secret/dependency scans, and submission eviden
 | F-006 | Explicit failure/lifecycle states | Must | TC-017–TC-024 | frontend/e2e | implemented | local pass |
 | F-007 | Target multi-wallet support | Must | TC-014, TC-015, TC-031 | adapter/testnet | partial | adapters pass locally; real-wallet testnet evidence pending |
 | F-008 | Transaction/event synchronization | Must | TC-016–TC-019, TC-032 | integration/e2e | partial | local modules pass; testnet event evidence pending |
-| F-101 | Continuous re-verification | Won't | — | — | — | n/a — Level 4 approval gate |
+| F-101 | Experimental credential freshness | Should | TC-013, TC-024, TC-036 | contract/frontend | implemented locally | synthetic-testnet only; not formal Level 4 approval |
 | F-102 | Cross-jurisdiction | Won't | — | — | — | n/a — Philippines only |
 | F-103 | Two-contract authorization | Must | TC-003, TC-010, TC-011 | contract/integration | implemented | local Rust + release-WASM pass; Quickstart CI pending |
 | F-104 | Real-anchor onboarding | Won't | — | — | — | n/a — no partner/approval |
@@ -100,7 +100,7 @@ conditional job has run successfully.
 | TC-010 | Real Credential Registry → Anchor Registry call | issue succeeds/fails from actual registry state, not a mock boolean |
 | TC-011 | Cross-contract failure atomicity | no credential mutation/event after nested failure |
 | TC-012 | Event topics/payloads | typed kind/ID and allowed fields only |
-| TC-013 | TTL behavior | instance/touched persistent TTLs extend; lifecycle values unchanged |
+| TC-013 | Refresh/TTL behavior | one pending successor, predecessor subject and issuer-continuity checks, atomic supersession, rejection cleanup, and touched persistent TTLs extend |
 
 ### Frontend and integration cases
 
@@ -116,7 +116,7 @@ conditional job has run successfully.
 | TC-021 | Wallet-free verify | no wallet prompt; five evidence rows and neutral result boundary |
 | TC-022 | Anchor screen states | simulation label, unauthorized/empty/polling/action/receipt states |
 | TC-023 | Failure catalog | wallet unavailable/rejected, unfunded, wrong network, RPC timeout, contract rejection |
-| TC-024 | Lifecycle catalog | requested, active, rejected, expired, revoked, missing, mismatch render distinctly |
+| TC-024 | Lifecycle catalog | requested, active, rejected, expired, revoked, superseded, missing, mismatch, and bounded successor-chain failure render distinctly |
 
 ### Browser, release, and evidence cases
 
@@ -133,6 +133,7 @@ conditional job has run successfully.
 | TC-033 | Pages smoke | release URL loads routes and wallet-free verify in desktop/mobile browser |
 | TC-034 | Binding and typed-ABI drift | release-WASM regeneration has zero diff; `request`/`issue`/`reject`/`revoke`/`get` return `Result<CredentialRecord, CredentialError>`, `status` returns `Result<CredentialStatus, CredentialError>`, and `exists` remains `bool` |
 | TC-035 | Internal recovery release validation | user-approved recovery-plan gates—FMD, frontend, Rust, integration, browser, manifest, secret/dependency/action checks—are green; this is not an organizer-rubric verdict |
+| TC-036 | Release freshness evidence | base request/issue, refresh request, predecessor supersession, and successor issue bind to the same source and app release SHAs |
 
 ## 8. Invariant Negative Tests
 

@@ -16,6 +16,7 @@ pub enum CredentialStatus {
     Rejected = 3,
     Revoked = 4,
     Expired = 5,
+    Superseded = 6,
 }
 
 #[contracttype]
@@ -27,6 +28,8 @@ pub struct CredentialRecord {
     pub schema_hash: BytesN<32>,
     pub expires_ledger: u32,
     pub issuer: Option<Address>,
+    pub previous_credential_id: Option<BytesN<32>>,
+    pub successor_credential_id: Option<BytesN<32>>,
     pub status: CredentialStatus,
     pub reason_code: Option<u32>,
     pub requested_at: u64,
@@ -40,6 +43,7 @@ pub struct CredentialRecord {
 pub enum DataKey {
     AnchorRegistry,
     Credential(BytesN<32>),
+    PendingSuccessor(BytesN<32>),
 }
 
 #[contracterror]
@@ -54,6 +58,10 @@ pub enum CredentialError {
     CredentialExpired = 6,
     InvalidExpiry = 7,
     ConfigurationMissing = 8,
+    SubjectMismatch = 9,
+    NonRefreshableState = 10,
+    IssuerDiscontinuity = 11,
+    PendingSuccessorExists = 12,
 }
 
 #[contractevent(topics = ["credential_requested"])]
@@ -61,6 +69,18 @@ pub struct CredentialRequested {
     #[topic]
     pub credential_id: BytesN<32>,
     #[topic]
+    pub subject: Address,
+    pub document_root: BytesN<32>,
+    pub schema_hash: BytesN<32>,
+    pub expires_ledger: u32,
+}
+
+#[contractevent(topics = ["credential_refresh_requested"])]
+pub struct CredentialRefreshRequested {
+    #[topic]
+    pub credential_id: BytesN<32>,
+    #[topic]
+    pub previous_credential_id: BytesN<32>,
     pub subject: Address,
     pub document_root: BytesN<32>,
     pub schema_hash: BytesN<32>,
@@ -94,6 +114,16 @@ pub struct CredentialRevoked {
     pub issuer: Address,
     pub reason_code: u32,
     pub revoked_ledger: u32,
+}
+
+#[contractevent(topics = ["credential_superseded"])]
+pub struct CredentialSuperseded {
+    #[topic]
+    pub credential_id: BytesN<32>,
+    #[topic]
+    pub successor_credential_id: BytesN<32>,
+    pub issuer: Address,
+    pub superseded_ledger: u32,
 }
 
 #[contract]
@@ -133,6 +163,8 @@ impl CredentialRegistry {
             schema_hash: schema_hash.clone(),
             expires_ledger,
             issuer: None,
+            previous_credential_id: None,
+            successor_credential_id: None,
             status: CredentialStatus::Requested,
             reason_code: None,
             requested_at: now_timestamp,
@@ -156,6 +188,80 @@ impl CredentialRegistry {
         Ok(record)
     }
 
+    pub fn request_refresh(
+        env: Env,
+        subject: Address,
+        credential_id: BytesN<32>,
+        previous_credential_id: BytesN<32>,
+        document_root: BytesN<32>,
+        schema_hash: BytesN<32>,
+        expires_ledger: u32,
+    ) -> Result<CredentialRecord, CredentialError> {
+        subject.require_auth();
+        if expires_ledger <= env.ledger().sequence() {
+            return Err(CredentialError::InvalidExpiry);
+        }
+        let key = DataKey::Credential(credential_id.clone());
+        if env.storage().persistent().has(&key) {
+            return Err(CredentialError::AlreadyExists);
+        }
+        let previous = load_record(&env, &previous_credential_id)?;
+        if previous.status != CredentialStatus::Issued {
+            return Err(CredentialError::NonRefreshableState);
+        }
+        if previous.subject != subject {
+            return Err(CredentialError::SubjectMismatch);
+        }
+        let previous_issuer = previous
+            .issuer
+            .ok_or(CredentialError::NonRefreshableState)?;
+        if !is_issuer_authorized(&env, &previous_issuer)? {
+            return Err(CredentialError::IssuerDiscontinuity);
+        }
+        let pending_key = DataKey::PendingSuccessor(previous_credential_id.clone());
+        if env.storage().persistent().has(&pending_key) {
+            return Err(CredentialError::PendingSuccessorExists);
+        }
+        let now_timestamp = env.ledger().timestamp();
+        let now_ledger = env.ledger().sequence();
+        let record = CredentialRecord {
+            credential_id: credential_id.clone(),
+            subject: subject.clone(),
+            document_root: document_root.clone(),
+            schema_hash: schema_hash.clone(),
+            expires_ledger,
+            issuer: None,
+            previous_credential_id: Some(previous_credential_id.clone()),
+            successor_credential_id: None,
+            status: CredentialStatus::Requested,
+            reason_code: None,
+            requested_at: now_timestamp,
+            requested_ledger: now_ledger,
+            updated_at: now_timestamp,
+            updated_ledger: now_ledger,
+        };
+        env.storage().persistent().set(&key, &record);
+        env.storage()
+            .persistent()
+            .extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
+        env.storage().persistent().set(&pending_key, &credential_id);
+        env.storage()
+            .persistent()
+            .extend_ttl(&pending_key, TTL_THRESHOLD, TTL_EXTEND_TO);
+        refresh_record_ttl(&env, &previous_credential_id);
+        bump_instance_ttl(&env);
+        CredentialRefreshRequested {
+            credential_id,
+            previous_credential_id,
+            subject,
+            document_root,
+            schema_hash,
+            expires_ledger,
+        }
+        .publish(&env);
+        Ok(record)
+    }
+
     pub fn issue(
         env: Env,
         issuer: Address,
@@ -170,6 +276,41 @@ impl CredentialRegistry {
             return Err(CredentialError::CredentialExpired);
         }
         require_authorized_issuer(&env, &issuer)?;
+        if let Some(previous_id) = record.previous_credential_id.clone() {
+            let mut previous = load_record(&env, &previous_id)?;
+            if previous.status != CredentialStatus::Issued {
+                return Err(CredentialError::NonRefreshableState);
+            }
+            if previous.issuer != Some(issuer.clone()) {
+                return Err(CredentialError::NotOriginalIssuer);
+            }
+            if !pending_successor_matches(&env, &previous_id, &credential_id) {
+                return Err(CredentialError::NonRefreshableState);
+            }
+            record.issuer = Some(issuer.clone());
+            record.status = CredentialStatus::Issued;
+            let updated = update_record(&env, &credential_id, &record);
+            previous.status = CredentialStatus::Superseded;
+            previous.successor_credential_id = Some(credential_id.clone());
+            update_record(&env, &previous_id, &previous);
+            env.storage()
+                .persistent()
+                .remove(&DataKey::PendingSuccessor(previous_id.clone()));
+            CredentialIssued {
+                credential_id: credential_id.clone(),
+                issuer: issuer.clone(),
+                issued_ledger: env.ledger().sequence(),
+            }
+            .publish(&env);
+            CredentialSuperseded {
+                credential_id: previous_id,
+                successor_credential_id: credential_id,
+                issuer,
+                superseded_ledger: env.ledger().sequence(),
+            }
+            .publish(&env);
+            return Ok(updated);
+        }
         record.issuer = Some(issuer.clone());
         record.status = CredentialStatus::Issued;
         let updated = update_record(&env, &credential_id, &record);
@@ -197,6 +338,21 @@ impl CredentialRegistry {
             return Err(CredentialError::CredentialExpired);
         }
         require_authorized_issuer(&env, &issuer)?;
+        if let Some(previous_id) = record.previous_credential_id.clone() {
+            let previous = load_record(&env, &previous_id)?;
+            if previous.status != CredentialStatus::Issued {
+                return Err(CredentialError::NonRefreshableState);
+            }
+            if previous.issuer != Some(issuer.clone()) {
+                return Err(CredentialError::NotOriginalIssuer);
+            }
+            if !pending_successor_matches(&env, &previous_id, &credential_id) {
+                return Err(CredentialError::NonRefreshableState);
+            }
+            env.storage()
+                .persistent()
+                .remove(&DataKey::PendingSuccessor(previous_id));
+        }
         record.issuer = Some(issuer.clone());
         record.status = CredentialStatus::Rejected;
         record.reason_code = Some(reason_code);
@@ -244,6 +400,7 @@ impl CredentialRegistry {
     pub fn get(env: Env, credential_id: BytesN<32>) -> Result<CredentialRecord, CredentialError> {
         let record = load_record(&env, &credential_id)?;
         refresh_record_ttl(&env, &credential_id);
+        refresh_pending_successor_ttl(&env, &record);
         bump_instance_ttl(&env);
         Ok(record)
     }
@@ -254,6 +411,7 @@ impl CredentialRegistry {
     ) -> Result<CredentialStatus, CredentialError> {
         let record = load_record(&env, &credential_id)?;
         refresh_record_ttl(&env, &credential_id);
+        refresh_pending_successor_ttl(&env, &record);
         bump_instance_ttl(&env);
         if is_active(&record) && is_expired(&env, &record) {
             Ok(CredentialStatus::Expired)
@@ -269,6 +427,9 @@ impl CredentialRegistry {
             env.storage()
                 .persistent()
                 .extend_ttl(&key, TTL_THRESHOLD, TTL_EXTEND_TO);
+            if let Some(record) = env.storage().persistent().get::<_, CredentialRecord>(&key) {
+                refresh_pending_successor_ttl(&env, &record);
+            }
         }
         bump_instance_ttl(&env);
         exists
@@ -311,6 +472,13 @@ fn is_active(record: &CredentialRecord) -> bool {
 }
 
 fn require_authorized_issuer(env: &Env, issuer: &Address) -> Result<(), CredentialError> {
+    if !is_issuer_authorized(env, issuer)? {
+        return Err(CredentialError::IssuerNotAuthorized);
+    }
+    Ok(())
+}
+
+fn is_issuer_authorized(env: &Env, issuer: &Address) -> Result<bool, CredentialError> {
     let registry: Address = env
         .storage()
         .instance()
@@ -321,10 +489,7 @@ fn require_authorized_issuer(env: &Env, issuer: &Address) -> Result<(), Credenti
         &Symbol::new(env, "is_authorized"),
         (issuer.clone(),).into_val(env),
     );
-    if !authorized {
-        return Err(CredentialError::IssuerNotAuthorized);
-    }
-    Ok(())
+    Ok(authorized)
 }
 
 fn refresh_record_ttl(env: &Env, credential_id: &BytesN<32>) {
@@ -333,6 +498,32 @@ fn refresh_record_ttl(env: &Env, credential_id: &BytesN<32>) {
         TTL_THRESHOLD,
         TTL_EXTEND_TO,
     );
+}
+
+fn pending_successor_matches(
+    env: &Env,
+    previous_credential_id: &BytesN<32>,
+    credential_id: &BytesN<32>,
+) -> bool {
+    env.storage()
+        .persistent()
+        .get::<_, BytesN<32>>(&DataKey::PendingSuccessor(previous_credential_id.clone()))
+        == Some(credential_id.clone())
+}
+
+fn refresh_pending_successor_ttl(env: &Env, record: &CredentialRecord) {
+    if record.status != CredentialStatus::Requested {
+        return;
+    }
+    if let Some(previous_credential_id) = record.previous_credential_id.clone() {
+        if pending_successor_matches(env, &previous_credential_id, &record.credential_id) {
+            env.storage().persistent().extend_ttl(
+                &DataKey::PendingSuccessor(previous_credential_id),
+                TTL_THRESHOLD,
+                TTL_EXTEND_TO,
+            );
+        }
+    }
 }
 
 fn bump_instance_ttl(env: &Env) {

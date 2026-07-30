@@ -1,7 +1,7 @@
 ---
 schema_version: 2.1.0
 status: draft
-last_updated: 2026-07-29
+last_updated: 2026-07-30
 doc: technical-design
 owns: module interfaces and the invariants each maintains · non-obvious logic and its complexity · interaction sequences · error propagation strategy · component-level decisions
 ---
@@ -44,6 +44,14 @@ request(
   schema_hash: BytesN<32>,
   expires_ledger: u32
 ) -> Result<CredentialRecord, CredentialError>
+request_refresh(
+  subject: Address,
+  credential_id: BytesN<32>,
+  previous_credential_id: BytesN<32>,
+  document_root: BytesN<32>,
+  schema_hash: BytesN<32>,
+  expires_ledger: u32
+) -> Result<CredentialRecord, CredentialError>
 issue(
   issuer: Address,
   credential_id: BytesN<32>
@@ -73,6 +81,7 @@ Lifecycle:
 ```text
 Requested -> Issued -> Revoked
 Requested -> Rejected
+Issued -> refresh Requested -> successor Issued + predecessor Superseded
 Requested or Issued -> Expired (derived when current ledger > expires_ledger)
 ```
 
@@ -83,6 +92,14 @@ Rules:
 - `issue`, `reject`, and `revoke` call `issuer.require_auth()`.
 - `issue` calls the configured Anchor Registry `is_authorized(issuer)` and rejects false.
 - `reject` also requires authorized-anchor membership and only accepts `Requested`.
+- `request_refresh` requires subject auth, a distinct successor ID, matching predecessor subject,
+  a stored `Issued` predecessor, continuing authorization of its issuer, and no pending successor.
+  It never overwrites the predecessor. A derived-expired stored `Issued` predecessor remains
+  refreshable.
+- Refresh issue/reject require the predecessor issuer as well as current anchor authorization.
+  Successful issue atomically links the records, marks the predecessor `Superseded`, clears the
+  pending key, and emits `credential_issued` plus `credential_superseded`; rejection only clears
+  the pending key and leaves the predecessor unchanged.
 - `revoke` requires authorization by the record's original issuer and only accepts `Issued`; it
   intentionally does not recheck Anchor Registry membership, so later anchor removal does not
   prevent revocation of an already-issued record.

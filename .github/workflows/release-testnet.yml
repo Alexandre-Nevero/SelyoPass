@@ -74,7 +74,7 @@ jobs:
             stellar keys address selyopass-anchor
             stellar keys address selyopass-subject
           } > release-addresses.txt
-      - name: Build, deploy, register, request, and issue
+      - name: Build, deploy, register, and execute base plus refresh lifecycle
         env:
           SELYOPASS_EXPIRES_LEDGER: ${{ inputs.expires_ledger }}
           STELLAR_ADMIN_IDENTITY: selyopass-admin

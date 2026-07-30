@@ -83,4 +83,45 @@ describe('SelyoPass screens', () => {
     });
     await waitFor(() => expect(screen.getByRole('button', { name: /download local package/i })).toBeEnabled());
   });
+  it('previews an eligible predecessor and submits a linked refresh with the subject wallet', async () => {
+    location.hash = '#/prepare';
+    const request_refresh = vi.fn().mockResolvedValue({ unsignedXdr: 'AAAA' });
+    const subject = 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF';
+    const client = {
+      configured: true,
+      contractId: 'CREDENTIAL',
+      sourceSha: 'a'.repeat(40),
+      request_refresh,
+      get: vi.fn().mockResolvedValue({ subject, issuer: 'GANCHOR', credential_id: 'a'.repeat(64) }),
+      status: vi.fn().mockResolvedValue('issued'),
+      is_authorized: vi.fn().mockResolvedValue(true),
+      getEvents: vi.fn().mockResolvedValue({ events: [] }),
+      submit: vi.fn().mockResolvedValue({ hash: 'a'.repeat(64) }),
+      confirm: vi.fn().mockResolvedValue({ status: 'SUCCESS', ledger: 42 }),
+    };
+    const wallets = {
+      connect: vi.fn().mockResolvedValue({ address: subject, wallet: 'Freighter' }),
+      sign: vi.fn().mockResolvedValue('BBBB'),
+    };
+    const user = userEvent.setup();
+    render(<App client={client} wallets={wallets} />);
+    await user.click(screen.getByRole('button', { name: /refresh existing credential/i }));
+    await user.click(screen.getByRole('button', { name: /connect freighter/i }));
+    await user.type(screen.getByLabelText(/previous credential id/i), 'base-credential');
+    await user.click(screen.getByRole('button', { name: /check existing credential/i }));
+    expect(await screen.findByText(/eligible predecessor/i)).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/expiry ledger/i), '900000');
+    await user.upload(screen.getByLabelText(/synthetic documents/i), new File(['synthetic'], 'synthetic.pdf', { type: 'application/pdf' }));
+    await user.click(screen.getByRole('button', { name: /request refresh/i }));
+    await waitFor(() => expect(request_refresh).toHaveBeenCalledWith(
+      subject,
+      'sp-demo-001',
+      'base-credential',
+      expect.stringMatching(/^[0-9a-f]{64}$/),
+      expect.stringMatching(/^[0-9a-f]{64}$/),
+      900000,
+    ));
+    expect(screen.getByText(/app release/i)).toHaveTextContent(/local-development/i);
+    expect(screen.getByText(/contract source/i)).toHaveTextContent('a'.repeat(40));
+  });
 });

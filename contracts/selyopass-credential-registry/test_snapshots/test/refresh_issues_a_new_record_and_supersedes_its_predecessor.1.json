@@ -42,72 +42,16 @@
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                 },
                 {
-                  "bytes": "2121212121212121212121212121212121212121212121212121212121212121"
+                  "bytes": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
                 },
                 {
-                  "bytes": "2323232323232323232323232323232323232323232323232323232323232323"
+                  "bytes": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
                 },
                 {
-                  "bytes": "2424242424242424242424242424242424242424242424242424242424242424"
+                  "bytes": "3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e"
                 },
                 {
-                  "u32": 20
-                }
-              ]
-            }
-          },
-          "sub_invocations": []
-        }
-      ]
-    ],
-    [
-      [
-        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-        {
-          "function": {
-            "contract_fn": {
-              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
-              "function_name": "reject",
-              "args": [
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                },
-                {
-                  "bytes": "2121212121212121212121212121212121212121212121212121212121212121"
-                },
-                {
-                  "u32": 1
-                }
-              ]
-            }
-          },
-          "sub_invocations": []
-        }
-      ]
-    ],
-    [
-      [
-        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
-        {
-          "function": {
-            "contract_fn": {
-              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
-              "function_name": "request",
-              "args": [
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
-                },
-                {
-                  "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
-                },
-                {
-                  "bytes": "2525252525252525252525252525252525252525252525252525252525252525"
-                },
-                {
-                  "bytes": "2626262626262626262626262626262626262626262626262626262626262626"
-                },
-                {
-                  "u32": 20
+                  "u32": 100
                 }
               ]
             }
@@ -129,7 +73,41 @@
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
+                  "bytes": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
+                }
+              ]
+            }
+          },
+          "sub_invocations": []
+        }
+      ]
+    ],
+    [
+      [
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M",
+        {
+          "function": {
+            "contract_fn": {
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
+              "function_name": "request_refresh",
+              "args": [
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                },
+                {
+                  "bytes": "3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e"
+                },
+                {
+                  "bytes": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
+                },
+                {
+                  "bytes": "3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f"
+                },
+                {
+                  "bytes": "4040404040404040404040404040404040404040404040404040404040404040"
+                },
+                {
+                  "u32": 200
                 }
               ]
             }
@@ -145,16 +123,13 @@
           "function": {
             "contract_fn": {
               "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM",
-              "function_name": "revoke",
+              "function_name": "issue",
               "args": [
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
-                },
-                {
-                  "u32": 2
+                  "bytes": "3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e"
                 }
               ]
             }
@@ -163,12 +138,11 @@
         }
       ]
     ],
-    [],
     []
   ],
   "ledger": {
     "protocol_version": 27,
-    "sequence_number": 21,
+    "sequence_number": 0,
     "timestamp": 0,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
     "base_reserve": 0,
@@ -226,26 +200,6 @@
               "key": {
                 "ledger_key_nonce": {
                   "nonce": "2032731177588607455"
-                }
-              },
-              "durability": "temporary",
-              "val": "void"
-            }
-          },
-          "ext": "v0"
-        },
-        "live_until": 6311999
-      },
-      {
-        "entry": {
-          "last_modified_ledger_seq": 0,
-          "data": {
-            "contract_data": {
-              "ext": "v0",
-              "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-              "key": {
-                "ledger_key_nonce": {
-                  "nonce": "4270020994084947596"
                 }
               },
               "durability": "temporary",
@@ -372,7 +326,7 @@
                     "symbol": "Credential"
                   },
                   {
-                    "bytes": "2121212121212121212121212121212121212121212121212121212121212121"
+                    "bytes": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
                   }
                 ]
               },
@@ -384,7 +338,7 @@
                       "symbol": "credential_id"
                     },
                     "val": {
-                      "bytes": "2121212121212121212121212121212121212121212121212121212121212121"
+                      "bytes": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
                     }
                   },
                   {
@@ -392,7 +346,7 @@
                       "symbol": "document_root"
                     },
                     "val": {
-                      "bytes": "2323232323232323232323232323232323232323232323232323232323232323"
+                      "bytes": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
                     }
                   },
                   {
@@ -400,7 +354,7 @@
                       "symbol": "expires_ledger"
                     },
                     "val": {
-                      "u32": 20
+                      "u32": 100
                     }
                   },
                   {
@@ -421,9 +375,7 @@
                     "key": {
                       "symbol": "reason_code"
                     },
-                    "val": {
-                      "u32": 1
-                    }
+                    "val": "void"
                   },
                   {
                     "key": {
@@ -446,7 +398,7 @@
                       "symbol": "schema_hash"
                     },
                     "val": {
-                      "bytes": "2424242424242424242424242424242424242424242424242424242424242424"
+                      "bytes": "3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e"
                     }
                   },
                   {
@@ -454,7 +406,7 @@
                       "symbol": "status"
                     },
                     "val": {
-                      "u32": 3
+                      "u32": 6
                     }
                   },
                   {
@@ -469,7 +421,9 @@
                     "key": {
                       "symbol": "successor_credential_id"
                     },
-                    "val": "void"
+                    "val": {
+                      "bytes": "3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e"
+                    }
                   },
                   {
                     "key": {
@@ -508,7 +462,7 @@
                     "symbol": "Credential"
                   },
                   {
-                    "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
+                    "bytes": "3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e"
                   }
                 ]
               },
@@ -520,7 +474,7 @@
                       "symbol": "credential_id"
                     },
                     "val": {
-                      "bytes": "2222222222222222222222222222222222222222222222222222222222222222"
+                      "bytes": "3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e3e"
                     }
                   },
                   {
@@ -528,7 +482,7 @@
                       "symbol": "document_root"
                     },
                     "val": {
-                      "bytes": "2525252525252525252525252525252525252525252525252525252525252525"
+                      "bytes": "3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f"
                     }
                   },
                   {
@@ -536,7 +490,7 @@
                       "symbol": "expires_ledger"
                     },
                     "val": {
-                      "u32": 20
+                      "u32": 200
                     }
                   },
                   {
@@ -551,15 +505,15 @@
                     "key": {
                       "symbol": "previous_credential_id"
                     },
-                    "val": "void"
+                    "val": {
+                      "bytes": "3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d3d"
+                    }
                   },
                   {
                     "key": {
                       "symbol": "reason_code"
                     },
-                    "val": {
-                      "u32": 2
-                    }
+                    "val": "void"
                   },
                   {
                     "key": {
@@ -582,7 +536,7 @@
                       "symbol": "schema_hash"
                     },
                     "val": {
-                      "bytes": "2626262626262626262626262626262626262626262626262626262626262626"
+                      "bytes": "4040404040404040404040404040404040404040404040404040404040404040"
                     }
                   },
                   {
@@ -590,7 +544,7 @@
                       "symbol": "status"
                     },
                     "val": {
-                      "u32": 4
+                      "u32": 2
                     }
                   },
                   {

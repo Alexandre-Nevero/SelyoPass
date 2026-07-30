@@ -1,7 +1,7 @@
 ---
 schema_version: 2.1.0
 status: draft
-last_updated: 2026-07-29
+last_updated: 2026-07-30
 doc: system-design
 owns: component boundaries and responsibilities · system context · data flow · technology choices and their trade-offs · integration failure behaviour · deployment topology · scaling strategy
 ---
@@ -63,9 +63,14 @@ sequenceDiagram
   C->>A: is_authorized(issuer)
   A-->>C: true
   C-->>O: issued event + receipt
+  F->>W: Authorize refresh request
+  W->>C: request_refresh(subject, successor, predecessor, root, schema, expiry)
+  O->>W: Authorize successor issue
+  W->>C: issue(issuer, successor)
+  C-->>O: successor issued + predecessor superseded events
   R->>R: Re-hash presented files
   R->>C: get/status/exists + event query
-  C-->>R: Public integrity evidence
+  C-->>R: Public integrity and freshness evidence
 ```
 
 All transaction writes are atomic. If the Anchor Registry call or authorization fails, issuance

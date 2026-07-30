@@ -27,6 +27,8 @@ function deployedManifest() {
       anchorRegistrationTxHash: tx,
       requestTxHash: tx,
       issueTxHash: tx,
+      refreshRequestTxHash: tx,
+      refreshIssueTxHash: tx,
     },
   };
 }
@@ -55,6 +57,16 @@ test('strict deployment accepts complete testnet evidence and rejects mainnet', 
   assert.deepEqual(validateDeploymentManifest(deployedManifest(), { requireDeployed: true }), []);
   const mainnet = { ...deployedManifest(), network: 'mainnet' };
   assert.match(validateDeploymentManifest(mainnet, { requireDeployed: true }).join('\n'), /testnet/);
+});
+
+test('strict deployment requires both refresh lifecycle transactions', () => {
+  const incomplete = deployedManifest();
+  delete incomplete.interactions.refreshRequestTxHash;
+  delete incomplete.interactions.refreshIssueTxHash;
+  assert.match(
+    validateDeploymentManifest(incomplete, { requireDeployed: true }).join('\n'),
+    /refreshRequestTxHash[\s\S]*refreshIssueTxHash|refreshIssueTxHash[\s\S]*refreshRequestTxHash/,
+  );
 });
 
 test('strict submission rejects stale evidence and accepts one release-bound package', () => {
