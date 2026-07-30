@@ -11,7 +11,7 @@ import { Client as AnchorRegistryClient } from '../contracts/anchor-registry/src
 import { Client as CredentialRegistryClient } from '../contracts/credential-registry/src/index.ts';
 
 export const CONTRACT_METHODS = Object.freeze([
-  'request', 'issue', 'reject', 'revoke', 'get', 'status', 'exists', 'is_authorized',
+  'request', 'request_refresh', 'issue', 'reject', 'revoke', 'get', 'status', 'exists', 'is_authorized',
 ]);
 
 const REQUIRED_ADAPTER_METHODS = [...CONTRACT_METHODS, 'getEvents', 'submit', 'confirm'];
@@ -38,7 +38,7 @@ function unwrap(result) {
 }
 
 function statusName(value) {
-  return ({ 1: 'requested', 2: 'issued', 3: 'rejected', 4: 'revoked', 5: 'expired' })[value] || value;
+  return ({ 1: 'requested', 2: 'issued', 3: 'rejected', 4: 'revoked', 5: 'expired', 6: 'superseded' })[value] || value;
 }
 
 function normalizeRecord(value) {
@@ -48,6 +48,8 @@ function normalizeRecord(value) {
     credential_id: bytesHex(value.credential_id),
     document_root: bytesHex(value.document_root),
     schema_hash: bytesHex(value.schema_hash),
+    previous_credential_id: value.previous_credential_id == null ? null : bytesHex(value.previous_credential_id),
+    successor_credential_id: value.successor_credential_id == null ? null : bytesHex(value.successor_credential_id),
     status: statusName(value.status),
   };
 }
@@ -64,6 +66,7 @@ function unavailableClient(injected) {
     configured: false,
     contractId: injected?.contractId || 'Not published',
     anchorContractId: injected?.anchorContractId || 'Not published',
+    sourceSha: injected?.sourceSha || deploymentManifest.sourceSha || 'Not published',
     rpcUrl: injected?.rpcUrl || deploymentManifest.rpcUrl,
   };
   for (const method of REQUIRED_ADAPTER_METHODS) client[method] = unavailable;
@@ -75,6 +78,7 @@ function injectedClient(injected) {
     configured: true,
     contractId: injected.contractId || 'Not published',
     anchorContractId: injected.anchorContractId || 'Not published',
+    sourceSha: injected.sourceSha || deploymentManifest.sourceSha || 'Not published',
     rpcUrl: injected.rpcUrl || deploymentManifest.rpcUrl,
   };
   for (const method of REQUIRED_ADAPTER_METHODS) client[method] = injected[method].bind(injected);
@@ -138,6 +142,7 @@ export function createConfiguredContractClient(options = globalThis.__SELYOPASS_
     configured: true,
     contractId: credentialId,
     anchorContractId: anchorId,
+    sourceSha: deployment.sourceSha || 'Not published',
     rpcUrl,
     request: async (subject, id, documentRoot, schemaHash, expiresLedger) => assemble(
       'request',
@@ -145,6 +150,18 @@ export function createConfiguredContractClient(options = globalThis.__SELYOPASS_
       {
         subject,
         credential_id: credentialIdBytes(id),
+        document_root: hexBytes(documentRoot, 'document root'),
+        schema_hash: hexBytes(schemaHash, 'schema hash'),
+        expires_ledger: expiresLedger,
+      },
+    ),
+    request_refresh: async (subject, id, previousId, documentRoot, schemaHash, expiresLedger) => assemble(
+      'request_refresh',
+      subject,
+      {
+        subject,
+        credential_id: credentialIdBytes(id),
+        previous_credential_id: credentialIdBytes(previousId),
         document_root: hexBytes(documentRoot, 'document root'),
         schema_hash: hexBytes(schemaHash, 'schema hash'),
         expires_ledger: expiresLedger,
@@ -198,6 +215,7 @@ export function createConfiguredContractClient(options = globalThis.__SELYOPASS_
         events: response.events.map((event) => {
           const topics = event.topic.map(toNative);
           const value = toNative(event.value);
+          const type = eventType(topics[0]);
           const normalizedValue = value && typeof value === 'object'
             ? {
               ...value,
@@ -209,9 +227,11 @@ export function createConfiguredContractClient(options = globalThis.__SELYOPASS_
             id: event.id,
             ledger: event.ledger,
             txHash: event.txHash,
-            type: eventType(topics[0]),
+            type,
             credentialId: bytesHex(topics[1] || value?.credential_id),
-            subject: bytesHex(topics[2] || value?.subject),
+            subject: bytesHex(type === 'requested' ? topics[2] : value?.subject),
+            previousCredentialId: bytesHex(type === 'refresh_requested' ? topics[2] || value?.previous_credential_id : value?.previous_credential_id),
+            successorCredentialId: bytesHex(type === 'superseded' ? topics[2] || value?.successor_credential_id : value?.successor_credential_id),
             documentRoot: bytesHex(value?.document_root),
             schemaHash: bytesHex(value?.schema_hash),
             expiresLedger: value?.expires_ledger,

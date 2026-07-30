@@ -58,6 +58,17 @@ doc: decision-ledger
 - **Invalidated:** claims that Level 4, real anchor, mainnet, real data, or cross-jurisdiction work is approved
 - **Recorded as:** `docs/level-4-proposal.md`
 
+### 2026-07-30 — Add synthetic-testnet freshness without a Level 4 claim
+- **ID:** DEC-008
+- **Type:** scope clarification
+- **Change:** F-101 proposal-only continuous re-verification → experimental immutable credential
+  freshness in the Level 3 testnet build.
+- **Why:** a successor link and atomic supersession are a bounded, hash-only lifecycle exercise;
+  they neither create a real-anchor process nor replace a relying institution's decision.
+- **Invalidated:** any claim that the feature is Builder Team-approved Level 4, applies to real
+  data, mainnet, institutional acceptance, or cross-jurisdiction credentials.
+- **Recorded as:** `docs/prd.md`, `docs/technical-design.md`, `docs/data-model.md`, and `docs/qa-test-plan.md`
+
 ### 2026-07-29 — Keep one canonical deployment
 - **ID:** DEC-003
 - **Type:** platform

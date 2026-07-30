@@ -17,7 +17,7 @@ fn release_wasm(name: &str) -> Vec<u8> {
 
 #[test]
 #[ignore = "requires cargo build --workspace --release --target wasm32v1-none first"]
-fn release_wasms_execute_a_real_cross_contract_issuance() {
+fn release_wasms_execute_a_real_cross_contract_refresh_lifecycle() {
     let env = Env::default();
     env.mock_all_auths();
     let admin = Address::generate(&env);
@@ -31,14 +31,29 @@ fn release_wasms_execute_a_real_cross_contract_issuance() {
 
     let credential_id = env.register(credential_wasm.as_slice(), (anchor_id,));
     let credentials = CredentialRegistryClient::new(&env, &credential_id);
-    let id = BytesN::from_array(&env, &[1; 32]);
-    let document_root = BytesN::from_array(&env, &[2; 32]);
-    let schema_hash = BytesN::from_array(&env, &[3; 32]);
+    let base_id = BytesN::from_array(&env, &[1; 32]);
+    let successor_id = BytesN::from_array(&env, &[2; 32]);
+    let document_root = BytesN::from_array(&env, &[3; 32]);
+    let schema_hash = BytesN::from_array(&env, &[4; 32]);
 
-    credentials.request(&subject, &id, &document_root, &schema_hash, &100);
-    let issued = credentials.issue(&admin, &id);
+    credentials.request(&subject, &base_id, &document_root, &schema_hash, &100);
+    credentials.issue(&admin, &base_id);
+    let requested = credentials.request_refresh(
+        &subject,
+        &successor_id,
+        &base_id,
+        &document_root,
+        &schema_hash,
+        &200,
+    );
+    let issued = credentials.issue(&admin, &successor_id);
 
     assert_eq!(issued.status, CredentialStatus::Issued);
     assert_eq!(issued.issuer, Some(admin));
-    assert_eq!(credentials.get(&id), issued);
+    assert_eq!(requested.previous_credential_id, Some(base_id.clone()));
+    assert_eq!(issued.previous_credential_id, Some(base_id.clone()));
+    let superseded = credentials.get(&base_id);
+    assert_eq!(superseded.status, CredentialStatus::Superseded);
+    assert_eq!(superseded.successor_credential_id, Some(successor_id.clone()));
+    assert_eq!(credentials.get(&successor_id), issued);
 }

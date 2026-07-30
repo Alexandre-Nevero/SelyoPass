@@ -4,6 +4,7 @@ import {
   createPresentationPackage,
   findIssuanceEvent,
   parsePresentationPackage,
+  resolveCredentialFreshness,
   validateLocalFiles,
   verifyEvidence,
 } from '../evidence.js';
@@ -145,9 +146,9 @@ describe('local evidence', () => {
 
   it('creates a detached package snapshot from the confirmed request', async () => {
     const input = {
-      client: { contractId: 'CREDENTIAL', anchorContractId: 'ANCHOR' },
+      client: { contractId: 'C'.padEnd(56, 'A'), anchorContractId: 'C'.padEnd(56, 'B') },
       record: { credential_id: 'sp-1', organization: 'Synthetic Org', schema_hash: 'b'.repeat(64), expires_ledger: 99 },
-      subject: 'GSUBJECT',
+      subject: 'G'.padEnd(56, 'A'),
       documentManifest: [descriptor('bir', 'c'.repeat(64), 10, 'bir.txt')],
       documentRoot: 'd'.repeat(64),
       receipt: { hash: 'e'.repeat(64), ledger: 10 },
@@ -156,6 +157,53 @@ describe('local evidence', () => {
     input.record.credential_id = 'changed';
     expect(snapshot.credential_label).toBe('sp-1');
     expect(snapshot.request_tx_hash).toBe('e'.repeat(64));
+  });
+
+  it('creates package 1.1 with freshness provenance while retaining package 1.0 reads', async () => {
+    const input = {
+      client: { contractId: 'C'.padEnd(56, 'A'), anchorContractId: 'C'.padEnd(56, 'B') },
+      record: {
+        credential_id: 'sp-successor', organization: 'Synthetic Org', schema_hash: 'b'.repeat(64), expires_ledger: 99,
+        previous_credential_id: 'a'.repeat(64),
+      },
+      subject: 'G'.padEnd(56, 'A'),
+      documentManifest: [descriptor('bir', 'c'.repeat(64), 10, 'bir.txt')],
+      documentRoot: 'd'.repeat(64),
+      receipt: { hash: 'e'.repeat(64), ledger: 10 },
+      appReleaseSha: 'f'.repeat(40),
+    };
+    const snapshot = await createPresentationPackage(input);
+    expect(snapshot).toMatchObject({
+      package_version: '1.1',
+      previous_credential_id: 'a'.repeat(64),
+      app_release_sha: 'f'.repeat(40),
+    });
+    const legacy = Object.fromEntries(Object.entries(snapshot)
+      .filter(([key]) => !['previous_credential_id', 'app_release_sha'].includes(key)));
+    expect(parsePresentationPackage({ ...legacy, package_version: '1.0' }))
+      .toMatchObject({ package_version: '1.0' });
+  });
+
+  it('follows a superseded credential to its current successor and rejects cycles and overlong chains', async () => {
+    const records = {
+      old: { credential_id: 'old', successor_credential_id: 'new' },
+      new: { credential_id: 'new', successor_credential_id: null },
+      loop: { credential_id: 'loop', successor_credential_id: 'loop' },
+    };
+    const status = { old: 'superseded', new: 'issued', loop: 'superseded' };
+    await expect(resolveCredentialFreshness({ credentialId: 'old', getRecord: async (id) => records[id], getStatus: async (id) => status[id] }))
+      .resolves.toMatchObject({ presentedStatus: 'superseded', currentStatus: 'issued', successorId: 'new' });
+    await expect(resolveCredentialFreshness({ credentialId: 'loop', getRecord: async (id) => records[id], getStatus: async (id) => status[id] }))
+      .rejects.toThrow(/cycle/i);
+    await expect(resolveCredentialFreshness({ credentialId: 'old', maxRecords: 1, getRecord: async (id) => records[id], getStatus: async (id) => status[id] }))
+      .rejects.toThrow(/10 records|limit/i);
+  });
+
+  it('reports the latest successor status when a presented credential is superseded', async () => {
+    const rows = await verifyEvidence({
+      freshness: { presentedStatus: 'superseded', currentStatus: 'revoked', successorId: 'b'.repeat(64) },
+    });
+    expect(rows.find((row) => row.key === 'credential_freshness').detail).toMatch(/revoked/i);
   });
 
   it('matches plaintext labels to hash-keyed issuance events', async () => {

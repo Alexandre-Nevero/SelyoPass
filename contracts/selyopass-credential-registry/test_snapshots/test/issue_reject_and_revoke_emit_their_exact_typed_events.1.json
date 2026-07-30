@@ -411,6 +411,12 @@
                   },
                   {
                     "key": {
+                      "symbol": "previous_credential_id"
+                    },
+                    "val": "void"
+                  },
+                  {
+                    "key": {
                       "symbol": "reason_code"
                     },
                     "val": {
@@ -456,6 +462,12 @@
                     "val": {
                       "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                     }
+                  },
+                  {
+                    "key": {
+                      "symbol": "successor_credential_id"
+                    },
+                    "val": "void"
                   },
                   {
                     "key": {
@@ -535,6 +547,12 @@
                   },
                   {
                     "key": {
+                      "symbol": "previous_credential_id"
+                    },
+                    "val": "void"
+                  },
+                  {
+                    "key": {
                       "symbol": "reason_code"
                     },
                     "val": {
@@ -580,6 +598,12 @@
                     "val": {
                       "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                     }
+                  },
+                  {
+                    "key": {
+                      "symbol": "successor_credential_id"
+                    },
+                    "val": "void"
                   },
                   {
                     "key": {

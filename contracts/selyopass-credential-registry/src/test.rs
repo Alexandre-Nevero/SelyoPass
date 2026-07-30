@@ -82,6 +82,259 @@ fn startup_auth_and_authorized_issuance_follow_the_registry_lifecycle() {
 }
 
 #[test]
+fn refresh_issues_a_new_record_and_supersedes_its_predecessor() {
+    let (env, credentials, anchors, admin, issuer, subject, _contract_id) = setup();
+    let previous_id = credential_id(&env, 61);
+    let successor_id = credential_id(&env, 62);
+    anchors.add_anchor(&admin, &issuer);
+    credentials.request(
+        &subject,
+        &previous_id,
+        &hash(&env, 61),
+        &hash(&env, 62),
+        &100,
+    );
+    credentials.issue(&issuer, &previous_id);
+
+    let requested = credentials.request_refresh(
+        &subject,
+        &successor_id,
+        &previous_id,
+        &hash(&env, 63),
+        &hash(&env, 64),
+        &200,
+    );
+    assert_eq!(requested.status, CredentialStatus::Requested);
+    assert_eq!(requested.previous_credential_id, Some(previous_id.clone()));
+
+    let issued = credentials.issue(&issuer, &successor_id);
+    assert_eq!(issued.status, CredentialStatus::Issued);
+    assert_eq!(issued.previous_credential_id, Some(previous_id.clone()));
+    let previous = credentials.get(&previous_id);
+    assert_eq!(previous.status, CredentialStatus::Superseded);
+    assert_eq!(previous.successor_credential_id, Some(successor_id));
+}
+
+#[test]
+fn refresh_requires_the_predecessor_subject_membership_and_one_pending_successor() {
+    let (env, credentials, anchors, admin, issuer, subject, _contract_id) = setup();
+    let other_subject = Address::generate(&env);
+    let previous_id = credential_id(&env, 63);
+    anchors.add_anchor(&admin, &issuer);
+    credentials.request(&subject, &previous_id, &hash(&env, 65), &hash(&env, 66), &100);
+    credentials.issue(&issuer, &previous_id);
+
+    assert_eq!(
+        credentials
+            .try_request_refresh(
+                &other_subject,
+                &credential_id(&env, 64),
+                &previous_id,
+                &hash(&env, 67),
+                &hash(&env, 68),
+                &200,
+            )
+            .unwrap_err(),
+        Ok(CredentialError::SubjectMismatch)
+    );
+
+    anchors.remove_anchor(&admin, &issuer);
+    assert_eq!(
+        credentials
+            .try_request_refresh(
+                &subject,
+                &credential_id(&env, 64),
+                &previous_id,
+                &hash(&env, 67),
+                &hash(&env, 68),
+                &200,
+            )
+            .unwrap_err(),
+        Ok(CredentialError::IssuerDiscontinuity)
+    );
+    anchors.add_anchor(&admin, &issuer);
+
+    credentials.request_refresh(
+        &subject,
+        &credential_id(&env, 64),
+        &previous_id,
+        &hash(&env, 67),
+        &hash(&env, 68),
+        &200,
+    );
+    assert_eq!(
+        credentials
+            .try_request_refresh(
+                &subject,
+                &credential_id(&env, 65),
+                &previous_id,
+                &hash(&env, 69),
+                &hash(&env, 70),
+                &200,
+            )
+            .unwrap_err(),
+        Ok(CredentialError::PendingSuccessorExists)
+    );
+}
+
+#[test]
+fn refresh_rejection_requires_the_original_issuer_and_clears_pending_state() {
+    let (env, credentials, anchors, admin, issuer, subject, _contract_id) = setup();
+    let other_issuer = Address::generate(&env);
+    let previous_id = credential_id(&env, 66);
+    let rejected_successor_id = credential_id(&env, 67);
+    let replacement_successor_id = credential_id(&env, 68);
+    anchors.add_anchor(&admin, &issuer);
+    anchors.add_anchor(&admin, &other_issuer);
+    credentials.request(&subject, &previous_id, &hash(&env, 71), &hash(&env, 72), &100);
+    credentials.issue(&issuer, &previous_id);
+    credentials.request_refresh(
+        &subject,
+        &rejected_successor_id,
+        &previous_id,
+        &hash(&env, 73),
+        &hash(&env, 74),
+        &200,
+    );
+
+    assert_eq!(
+        credentials
+            .try_reject(&other_issuer, &rejected_successor_id, &9)
+            .unwrap_err(),
+        Ok(CredentialError::NotOriginalIssuer)
+    );
+    let rejected = credentials.reject(&issuer, &rejected_successor_id, &9);
+    assert_eq!(rejected.status, CredentialStatus::Rejected);
+    assert_eq!(credentials.get(&previous_id).status, CredentialStatus::Issued);
+
+    let replacement = credentials.request_refresh(
+        &subject,
+        &replacement_successor_id,
+        &previous_id,
+        &hash(&env, 75),
+        &hash(&env, 76),
+        &200,
+    );
+    assert_eq!(replacement.previous_credential_id, Some(previous_id));
+}
+
+#[test]
+fn refresh_accepts_a_stored_issued_predecessor_after_its_expiry() {
+    let (env, credentials, anchors, admin, issuer, subject, _contract_id) = setup();
+    let previous_id = credential_id(&env, 69);
+    let successor_id = credential_id(&env, 70);
+    anchors.add_anchor(&admin, &issuer);
+    credentials.request(&subject, &previous_id, &hash(&env, 77), &hash(&env, 78), &10);
+    credentials.issue(&issuer, &previous_id);
+    env.ledger().set_sequence_number(11);
+    assert_eq!(credentials.status(&previous_id), CredentialStatus::Expired);
+
+    let successor = credentials.request_refresh(
+        &subject,
+        &successor_id,
+        &previous_id,
+        &hash(&env, 79),
+        &hash(&env, 80),
+        &20,
+    );
+    assert_eq!(successor.status, CredentialStatus::Requested);
+    assert_eq!(successor.previous_credential_id, Some(previous_id));
+}
+
+#[test]
+fn refresh_and_supersession_emit_exact_typed_events() {
+    let (env, credentials, anchors, admin, issuer, subject, contract_id) = setup();
+    let previous_id = credential_id(&env, 71);
+    let successor_id = credential_id(&env, 72);
+    let root = hash(&env, 81);
+    let schema = hash(&env, 82);
+    anchors.add_anchor(&admin, &issuer);
+    credentials.request(&subject, &previous_id, &root, &schema, &100);
+    credentials.issue(&issuer, &previous_id);
+
+    credentials.request_refresh(&subject, &successor_id, &previous_id, &root, &schema, &200);
+    let refresh = CredentialRefreshRequested {
+        credential_id: successor_id.clone(),
+        previous_credential_id: previous_id.clone(),
+        subject: subject.clone(),
+        document_root: root,
+        schema_hash: schema,
+        expires_ledger: 200,
+    };
+    assert_eq!(env.events().all().events(), &[refresh.to_xdr(&env, &contract_id)]);
+
+    credentials.issue(&issuer, &successor_id);
+    let issued = CredentialIssued {
+        credential_id: successor_id.clone(),
+        issuer: issuer.clone(),
+        issued_ledger: env.ledger().sequence(),
+    };
+    let superseded = CredentialSuperseded {
+        credential_id: previous_id,
+        successor_credential_id: successor_id,
+        issuer,
+        superseded_ledger: env.ledger().sequence(),
+    };
+    assert_eq!(
+        env.events().all().events(),
+        &[issued.to_xdr(&env, &contract_id), superseded.to_xdr(&env, &contract_id)]
+    );
+}
+
+#[test]
+fn refresh_reads_extend_the_pending_guard_and_stale_successors_cannot_clear_a_new_guard() {
+    let (env, credentials, anchors, admin, issuer, subject, contract_id) = setup();
+    let previous_id = credential_id(&env, 73);
+    let stale_successor_id = credential_id(&env, 74);
+    let current_successor_id = credential_id(&env, 75);
+    anchors.add_anchor(&admin, &issuer);
+    credentials.request(&subject, &previous_id, &hash(&env, 83), &hash(&env, 84), &u32::MAX);
+    credentials.issue(&issuer, &previous_id);
+    credentials.request_refresh(
+        &subject,
+        &stale_successor_id,
+        &previous_id,
+        &hash(&env, 85),
+        &hash(&env, 86),
+        &u32::MAX,
+    );
+
+    env.ledger()
+        .set_sequence_number(TTL_EXTEND_TO - TTL_THRESHOLD + 10);
+    credentials.get(&stale_successor_id);
+    let pending_ttl = env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .get_ttl(&DataKey::PendingSuccessor(previous_id.clone()))
+    });
+    assert!(pending_ttl >= TTL_EXTEND_TO);
+
+    env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .remove(&DataKey::PendingSuccessor(previous_id.clone()));
+    });
+    credentials.request_refresh(
+        &subject,
+        &current_successor_id,
+        &previous_id,
+        &hash(&env, 87),
+        &hash(&env, 88),
+        &u32::MAX,
+    );
+    assert_eq!(
+        credentials.try_issue(&issuer, &stale_successor_id).unwrap_err(),
+        Ok(CredentialError::NonRefreshableState)
+    );
+    let pending = env.as_contract(&contract_id, || {
+        env.storage()
+            .persistent()
+            .get::<_, BytesN<32>>(&DataKey::PendingSuccessor(previous_id.clone()))
+    });
+    assert_eq!(pending, Some(current_successor_id));
+}
+
+#[test]
 fn duplicate_and_illegal_transitions_return_typed_errors() {
     let (env, credentials, anchors, admin, issuer, subject, _contract_id) = setup();
     let id = credential_id(&env, 22);

@@ -22,7 +22,7 @@ const deployment = {
 
 describe('Soroban contract adapter', () => {
   it('exposes only the planned credential contract methods', () => {
-    expect(CONTRACT_METHODS).toEqual(['request', 'issue', 'reject', 'revoke', 'get', 'status', 'exists', 'is_authorized']);
+    expect(CONTRACT_METHODS).toEqual(['request', 'request_refresh', 'issue', 'reject', 'revoke', 'get', 'status', 'exists', 'is_authorized']);
   });
   it('does not fabricate bindings when generated bindings are absent', async () => {
     const client = createConfiguredContractClient({});
@@ -49,8 +49,9 @@ describe('Soroban contract adapter', () => {
     const assembled = { toXDR: () => 'unsigned-xdr', result: { unwrap: () => ({ status: 1 }) } };
     const credentialFactory = (options) => ({
       request: async (args) => { calls.push({ options, args }); return assembled; },
-      get: async () => assembled,
-      status: async () => ({ result: { unwrap: () => 1 } }),
+      request_refresh: async (args) => { calls.push({ options, args }); return assembled; },
+      get: async () => ({ result: { unwrap: () => ({ status: 6, credential_id: Buffer.alloc(32, 1), previous_credential_id: Buffer.alloc(32, 2), successor_credential_id: Buffer.alloc(32, 3) }) } }),
+      status: async () => ({ result: { unwrap: () => 6 } }),
       exists: async () => ({ result: true }),
     });
     const anchorFactory = () => ({
@@ -72,8 +73,21 @@ describe('Soroban contract adapter', () => {
     expect(result.unsignedXdr).toBe('unsigned-xdr');
     expect(calls[0].options.publicKey).toMatch(/^G/);
     expect(calls[0].args.credential_id).toHaveLength(32);
-    await expect(client.get('SP-001')).resolves.toMatchObject({ status: 'requested' });
-    await expect(client.status('SP-001')).resolves.toBe('requested');
+    await expect(client.request_refresh(
+      'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+      'SP-002',
+      'SP-001',
+      '33'.repeat(32),
+      '44'.repeat(32),
+      456,
+    )).resolves.toEqual({ unsignedXdr: 'unsigned-xdr' });
+    expect(calls[1].args.previous_credential_id).toHaveLength(32);
+    await expect(client.get('SP-001')).resolves.toMatchObject({
+      status: 'superseded',
+      previous_credential_id: '02'.repeat(32),
+      successor_credential_id: '03'.repeat(32),
+    });
+    await expect(client.status('SP-001')).resolves.toBe('superseded');
     await expect(client.exists('SP-001')).resolves.toBe(true);
     await expect(client.is_authorized('GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF')).resolves.toBe(true);
   });

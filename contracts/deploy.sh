@@ -72,6 +72,8 @@ before_transaction() {
 CREDENTIAL_ID="1111111111111111111111111111111111111111111111111111111111111111"
 DOCUMENT_ROOT="2222222222222222222222222222222222222222222222222222222222222222"
 SCHEMA_HASH="3333333333333333333333333333333333333333333333333333333333333333"
+SUCCESSOR_CREDENTIAL_ID="4444444444444444444444444444444444444444444444444444444444444444"
+REFRESH_DOCUMENT_ROOT="5555555555555555555555555555555555555555555555555555555555555555"
 
 if [[ "${SELYOPASS_SKIP_BUILD:-0}" == "1" ]]; then
     echo "Using prebuilt optimized wasm32v1-none contracts..."
@@ -155,7 +157,39 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
     ISSUE_TX="$(capture_new_transaction "$ANCHOR_ADDRESS" "$ISSUE_BEFORE")"
 fi
 
-echo "Reading the authoritative credential record..."
+echo "Requesting a synthetic credential refresh..."
+REFRESH_REQUEST_BEFORE="$(before_transaction "$SUBJECT_ADDRESS")"
+stellar contract invoke \
+    --id "$CREDENTIAL_REGISTRY_ID" \
+    --network "$NETWORK" \
+    --source-account "$SUBJECT_IDENTITY" \
+    -- \
+    request_refresh \
+    --subject "$SUBJECT_ADDRESS" \
+    --credential_id "$SUCCESSOR_CREDENTIAL_ID" \
+    --previous_credential_id "$CREDENTIAL_ID" \
+    --document_root "$REFRESH_DOCUMENT_ROOT" \
+    --schema_hash "$SCHEMA_HASH" \
+    --expires_ledger "$EXPIRES_LEDGER"
+if [[ -n "$EVIDENCE_FILE" ]]; then
+    REFRESH_REQUEST_TX="$(capture_new_transaction "$SUBJECT_ADDRESS" "$REFRESH_REQUEST_BEFORE")"
+fi
+
+echo "Issuing the synthetic refreshed credential..."
+REFRESH_ISSUE_BEFORE="$(before_transaction "$ANCHOR_ADDRESS")"
+stellar contract invoke \
+    --id "$CREDENTIAL_REGISTRY_ID" \
+    --network "$NETWORK" \
+    --source-account "$ANCHOR_IDENTITY" \
+    -- \
+    issue \
+    --issuer "$ANCHOR_ADDRESS" \
+    --credential_id "$SUCCESSOR_CREDENTIAL_ID"
+if [[ -n "$EVIDENCE_FILE" ]]; then
+    REFRESH_ISSUE_TX="$(capture_new_transaction "$ANCHOR_ADDRESS" "$REFRESH_ISSUE_BEFORE")"
+fi
+
+echo "Reading authoritative predecessor and successor records..."
 stellar contract invoke \
     --id "$CREDENTIAL_REGISTRY_ID" \
     --network "$NETWORK" \
@@ -163,6 +197,13 @@ stellar contract invoke \
     -- \
     get \
     --credential_id "$CREDENTIAL_ID"
+stellar contract invoke \
+    --id "$CREDENTIAL_REGISTRY_ID" \
+    --network "$NETWORK" \
+    --source-account "$SUBJECT_IDENTITY" \
+    -- \
+    get \
+    --credential_id "$SUCCESSOR_CREDENTIAL_ID"
 
 echo "Anchor Registry: $ANCHOR_REGISTRY_ID"
 echo "Credential Registry: $CREDENTIAL_REGISTRY_ID"
@@ -182,6 +223,8 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
         --arg anchor_registration_tx "$ANCHOR_REGISTRATION_TX" \
         --arg request_tx "$REQUEST_TX" \
         --arg issue_tx "$ISSUE_TX" \
+        --arg refresh_request_tx "$REFRESH_REQUEST_TX" \
+        --arg refresh_issue_tx "$REFRESH_ISSUE_TX" \
         '{
           schemaVersion: 1,
           network: "testnet",
@@ -196,7 +239,9 @@ if [[ -n "$EVIDENCE_FILE" ]]; then
           interactions: {
             anchorRegistrationTxHash: $anchor_registration_tx,
             requestTxHash: $request_tx,
-            issueTxHash: $issue_tx
+            issueTxHash: $issue_tx,
+            refreshRequestTxHash: $refresh_request_tx,
+            refreshIssueTxHash: $refresh_issue_tx
           }
         }' > "$EVIDENCE_FILE"
     echo "Deployment review candidate: $EVIDENCE_FILE"

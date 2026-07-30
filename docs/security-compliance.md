@@ -1,7 +1,7 @@
 ---
 schema_version: 2.1.0
 status: draft
-last_updated: 2026-07-29
+last_updated: 2026-07-30
 doc: security-compliance
 owns: hard rules / invariants (INV-###) and their authority · challenge records (CHAL-###) · threat model (T-###) · data classification · authn/authz model · secrets & audit policy · the pre-milestone go/no-go gate
 ---
@@ -19,7 +19,7 @@ owns: hard rules / invariants (INV-###) and their authority · challenge records
 | INV-001 | equate integrity with compliance approval or transfer the relying institution's KYB decision | Load-bearing product boundary | `idea.md` §6/§9; BR-003 |
 | INV-002 | use real PII anywhere, or put document bytes, identity fields, or free-text reasons in chain state/events, logs, or public/submission evidence; explicitly synthetic identity-shaped values may exist only in local fixtures/browser-local packages | Public and logged surfaces are incompatible with identity content; synthetic fixtures are required for this demonstrator | BR-002; RA 10173 pre-real-data review |
 | INV-003 | handle or persist a private key/secret seed in source, browser storage, fixtures, docs, logs, or artifacts | A leaked key defeats issuer and user authorization | Stellar wallet/auth model |
-| INV-004 | allow issue/reject without issuer auth and current Anchor Registry membership, block an authenticated original issuer from revoking solely because of later anchor removal, or allow non-original-issuer revocation | Prevent forged actions while preserving the original issuer's duty to revoke an already-issued record | BR-001; contract authorization design |
+| INV-004 | allow issue/reject without issuer auth and current Anchor Registry membership, allow a refresh issuer other than the predecessor issuer, block an authenticated original issuer from revoking solely because of later anchor removal, or allow non-original-issuer revocation | Prevent forged lifecycle actions while preserving the original issuer's duty to revoke an already-issued record | BR-001; contract authorization design |
 | INV-005 | submit a request without subject authorization or require a wallet for public verification | Consent for writes; public independent reads | contract authorization design; F-002/F-004 |
 | INV-006 | present simulated/testnet/planned/unverified behavior as real, mainnet, deployed, validated, or regulator-approved | Submission and user claims must be auditable | context/idea evidence boundary |
 | INV-007 | begin Level 4 implementation or real-data handling without written approval and privacy/security gates | Prevent unauthorized scope and unsafe data processing | approved phase gate |

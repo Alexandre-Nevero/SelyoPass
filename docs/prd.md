@@ -1,7 +1,7 @@
 ---
 schema_version: 2.1.0
 status: draft
-last_updated: 2026-07-29
+last_updated: 2026-07-30
 doc: prd
 owns: current features (F-###) and their MoSCoW priority · personas · user stories (US-###) and their acceptance criteria · cross-cutting business rules (BR-###) · app flow, screen inventory & UX intent · instrumentation taxonomy
 ---
@@ -47,7 +47,7 @@ change them here, preserve stable IDs, and record a material seed departure in t
 | F-006 | Explicit operation and lifecycle states | Must | Failure ambiguity | Includes rejected/expired/revoked |
 | F-007 | Target multi-wallet support through Wallets Kit | Must | Wallet choice | Target adapters are Freighter and Albedo; both require real connection evidence |
 | F-008 | Transaction lifecycle and RPC event synchronization | Must | Observable progress and provenance | Five-second polling, not streaming |
-| F-101 | Continuous re-verification | Won't | Credential freshness | Requires written Level 4 approval |
+| F-101 | Experimental credential freshness | Should | Synthetic-testnet credential renewal | Creates an immutable successor and supersedes the prior record; this is not formal Level 4 development or approval |
 | F-102 | Cross-jurisdiction schemas | Won't | SEA reuse | Philippines-only |
 | F-103 | Anchor Registry + Credential Registry cross-contract design | Must | Meaningful authorization | Two contracts, not artificial layers |
 | F-104 | Real-anchor onboarding | Won't | Institutional network bootstrap | No partner agreement or approval |
@@ -120,11 +120,21 @@ As a release reviewer, I want one manifest bound to a release SHA.
 - Given a candidate that passes, when reviewed, then test, deployment, interaction, event,
   inter-contract, wallet, responsive, CI, Pages, and demo evidence resolve to that SHA.
 
+**US-009 — Refresh a synthetic credential** *(F-101)*
+As a founder, I want to request a renewed synthetic credential without rewriting the prior record.
+
+- Given a stored-issued prior credential whose subject matches the connected wallet and whose issuer
+  is currently authorized, when the founder requests refresh, then a distinct successor request
+  records the predecessor ID and does not mutate the prior record.
+- Given the predecessor issuer issues the successor, when the transaction succeeds, then the
+  predecessor becomes `Superseded`, both record links are visible, and public verification reports
+  freshness separately from any KYB decision.
+
 ### 4.1 Cross-cutting rules (`BR-###`)
 
 | `BR-###` | Rule | Invoked by |
 |---|---|---|
-| BR-001 | Issue/reject require issuer auth plus current Anchor Registry membership; revoke requires auth by the original issuer and remains available after later anchor removal; reads are public. | US-003, US-005, US-006 |
+| BR-001 | Issue/reject require issuer auth plus current Anchor Registry membership; refresh issue/reject additionally require the predecessor issuer; revoke requires auth by the original issuer and remains available after later anchor removal; reads are public. | US-003, US-005, US-006, US-009 |
 | BR-002 | Real PII is prohibited; identity-shaped values are explicitly synthetic and local only; public/on-chain/log payloads contain hashes and bounded non-identity metadata only. | US-001, US-004, US-006 |
 | BR-003 | Integrity language never claims compliance approval. | US-006, US-007, US-008 |
 | BR-004 | Transaction receipts persist terminal evidence and Explorer links. | US-003, US-005, US-008 |

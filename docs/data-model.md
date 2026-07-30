@@ -1,7 +1,7 @@
 ---
 schema_version: 2.1.0
 status: draft
-last_updated: 2026-07-29
+last_updated: 2026-07-30
 doc: data-model
 owns: entities and their relationships · per-field types, nullability and defaults · keys, constraints and indexes · schema migration and rollback
 ---
@@ -45,24 +45,29 @@ codes. Presentation packages and document descriptors remain local to the holder
 | `subject` | `Address` | yes | authorized request signer |
 | `document_root` | `BytesN<32>` | yes | SHA-256 canonical manifest root |
 | `schema_hash` | `BytesN<32>` | yes | SHA-256 of schema identifier/version |
-| `status` | `CredentialStatus` | yes | `Requested`, `Issued`, `Rejected`, `Revoked` |
+| `status` | `CredentialStatus` | yes | `Requested`, `Issued`, `Rejected`, `Revoked`, `Superseded`; `Expired` remains derived |
 | `requested_ledger` | `u32` | yes | ledger at creation |
 | `requested_at` | `u64` | yes | ledger timestamp at creation |
 | `expires_ledger` | `u32` | yes | greater than request ledger |
 | `issuer` | `Option<Address>` | no | set on issue/reject; immutable afterward |
+| `previous_credential_id` | `Option<BytesN<32>>` | no | immutable predecessor for a refresh successor |
+| `successor_credential_id` | `Option<BytesN<32>>` | no | set atomically when the successor is issued |
 | `reason_code` | `Option<u32>` | no | numeric reject/revoke code; never free text |
 | `updated_at` | `u64` | yes | timestamp of latest mutation |
 | `updated_ledger` | `u32` | yes | ledger of latest mutation |
 
 `Expired` is a derived read status when current ledger exceeds `expires_ledger`; it is not a
-mutation that depends on a keeper transaction.
+mutation that depends on a keeper transaction. A stored `Issued` record may be refreshed after
+derived expiry; revoked, rejected, requested, and superseded records may not. `PendingSuccessor`
+is a private persistent key that prevents competing successors and is cleared on refresh rejection
+or issuance.
 
 ### CredentialEvent — public RPC event
 
 | Field | Type | Constraint |
 |---|---|---|
 | `event_id` | RPC event ID | dedupe key; not contract storage |
-| `event_kind` | typed symbol | requested/issued/rejected/revoked |
+| `event_kind` | typed symbol | requested/issued/rejected/revoked/refresh_requested/superseded |
 | `credential_id` | `BytesN<32>` | topic |
 | `subject` | `Address` | public |
 | `issuer` | optional `Address` | issue/reject/revoke only |
@@ -85,6 +90,8 @@ mutation that depends on a keeper transaction.
 | `document_root` | hash | yes | recomputable |
 | `request_tx_hash` | hash | yes | receipt |
 | `issue_tx_hash` | optional hash | no | present after issued package refresh |
+| `previous_credential_id` | 32-byte hex or null | package 1.1 | predecessor provenance for a refreshed credential |
+| `app_release_sha` | Git SHA | package 1.1 | browser build that created the package; package 1.0 remains readable |
 | `created_at` | ISO timestamp | yes | local metadata; not authority |
 
 ### DocumentDescriptor — off-chain local JSON
