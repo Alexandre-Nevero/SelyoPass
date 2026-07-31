@@ -25,7 +25,9 @@ describe('Soroban contract adapter', () => {
     expect(CONTRACT_METHODS).toEqual(['request', 'request_refresh', 'issue', 'reject', 'revoke', 'get', 'status', 'exists', 'is_authorized']);
   });
   it('does not fabricate bindings when generated bindings are absent', async () => {
-    const client = createConfiguredContractClient({});
+    const client = createConfiguredContractClient({
+      deployment: { status: 'not_deployed', contracts: {} },
+    });
     expect(client.configured).toBe(false);
     await expect(client.issue('G', 'id')).rejects.toThrow(/not configured/i);
   });
