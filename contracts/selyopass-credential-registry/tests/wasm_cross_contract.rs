@@ -54,6 +54,9 @@ fn release_wasms_execute_a_real_cross_contract_refresh_lifecycle() {
     assert_eq!(issued.previous_credential_id, Some(base_id.clone()));
     let superseded = credentials.get(&base_id);
     assert_eq!(superseded.status, CredentialStatus::Superseded);
-    assert_eq!(superseded.successor_credential_id, Some(successor_id.clone()));
+    assert_eq!(
+        superseded.successor_credential_id,
+        Some(successor_id.clone())
+    );
     assert_eq!(credentials.get(&successor_id), issued);
 }

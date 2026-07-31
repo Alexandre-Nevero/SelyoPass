@@ -49,13 +49,13 @@ There are no active overlays; the 2026-07-29 recovery decisions are consolidated
 
 | Document | File | Status | Last updated |
 |---|---|---|---|
-| PRD | [prd.md](prd.md) | draft | 2026-07-29 |
-| System Design | [system-design.md](system-design.md) | draft | 2026-07-29 |
-| Technical Design | [technical-design.md](technical-design.md) | draft | 2026-07-29 |
-| Data Model | [data-model.md](data-model.md) | draft | 2026-07-29 |
+| PRD | [prd.md](prd.md) | draft | 2026-07-30 |
+| System Design | [system-design.md](system-design.md) | draft | 2026-07-30 |
+| Technical Design | [technical-design.md](technical-design.md) | draft | 2026-07-30 |
+| Data Model | [data-model.md](data-model.md) | draft | 2026-07-30 |
 | Design System | [design-system.md](design-system.md) | draft | 2026-07-29 |
-| QA Test Plan | [qa-test-plan.md](qa-test-plan.md) | draft | 2026-07-29 |
-| Security & Compliance | [security-compliance.md](security-compliance.md) | draft | 2026-07-29 |
+| QA Test Plan | [qa-test-plan.md](qa-test-plan.md) | draft | 2026-07-30 |
+| Security & Compliance | [security-compliance.md](security-compliance.md) | draft | 2026-07-30 |
 | Build Guide | [BUILD.md](BUILD.md) | draft | 2026-07-29 |
 | Active Phase Plan | [plans/phase-01-recovery-foundation.md](plans/phase-01-recovery-foundation.md) | draft | 2026-07-29 |
 | Operations | [ops.md](ops.md) | draft | 2026-07-29 |
