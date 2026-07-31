@@ -54,7 +54,7 @@ describe('Soroban contract adapter', () => {
       request_refresh: async (args) => { calls.push({ options, args }); return assembled; },
       get: async () => ({ result: { unwrap: () => ({ status: 6, credential_id: Buffer.alloc(32, 1), previous_credential_id: Buffer.alloc(32, 2), successor_credential_id: Buffer.alloc(32, 3) }) } }),
       status: async () => ({ result: { unwrap: () => 6 } }),
-      exists: async () => ({ result: true }),
+      exists: async () => ({ result: false }),
     });
     const anchorFactory = () => ({
       is_authorized: async () => ({ result: true }),
@@ -90,7 +90,7 @@ describe('Soroban contract adapter', () => {
       successor_credential_id: '03'.repeat(32),
     });
     await expect(client.status('SP-001')).resolves.toBe('superseded');
-    await expect(client.exists('SP-001')).resolves.toBe(true);
+    await expect(client.exists('SP-001')).resolves.toBe(false);
     await expect(client.is_authorized('GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF')).resolves.toBe(true);
   });
   it('submits signed XDR, confirms it, and normalizes contract events', async () => {
@@ -126,5 +126,72 @@ describe('Soroban contract adapter', () => {
         txHash: 'b'.repeat(64),
       })],
     });
+  });
+  it('rejects request() before simulating when a credential with this ID already exists, instead of handing back a signable duplicate request', async () => {
+    // Root cause of the false "RPC request timed out" bug: request() used to
+    // hand back an unsignedXdr regardless of whether the ID already existed,
+    // so the user signed and submitted a call the contract was always going
+    // to refuse, burning the full confirm() budget before any error surfaced.
+    const requestCalls = [];
+    const credentialFactory = () => ({
+      request: async (args) => { requestCalls.push(args); return { toXDR: () => 'unsigned-xdr', result: { unwrap: () => ({}) } }; },
+      exists: async () => ({ result: true }),
+    });
+    const client = createConfiguredContractClient({
+      deployment,
+      credentialFactory,
+      anchorFactory: () => ({}),
+      server: {},
+    });
+    await expect(client.request(
+      'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+      'sp-demo-001',
+      '11'.repeat(32),
+      '22'.repeat(32),
+      123,
+    )).rejects.toThrow(/AlreadyExists/);
+    expect(requestCalls).toHaveLength(0);
+  });
+  it('rejects request_refresh() before simulating when the new credential ID already exists, matching request()', async () => {
+    // The contract applies the identical AlreadyExists check to
+    // request_refresh's new credential_id (not previous_credential_id), so
+    // this gets the same cheap precheck as request() for the same reason.
+    const refreshCalls = [];
+    const credentialFactory = () => ({
+      request_refresh: async (args) => { refreshCalls.push(args); return { toXDR: () => 'unsigned-xdr', result: { unwrap: () => ({}) } }; },
+      exists: async () => ({ result: true }),
+    });
+    const client = createConfiguredContractClient({
+      deployment,
+      credentialFactory,
+      anchorFactory: () => ({}),
+      server: {},
+    });
+    await expect(client.request_refresh(
+      'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+      'sp-demo-002',
+      'sp-demo-001',
+      '11'.repeat(32),
+      '22'.repeat(32),
+      123,
+    )).rejects.toThrow(/AlreadyExists/);
+    expect(refreshCalls).toHaveLength(0);
+  });
+  it('throws instead of returning a signable transaction when simulation itself reports a contract-level rejection', async () => {
+    const rejected = { toXDR: () => 'unsigned-xdr', result: { isOk: () => false, isErr: () => true, unwrap: () => { throw new Error(''); } } };
+    const credentialFactory = () => ({
+      issue: async () => rejected,
+      exists: async () => ({ result: false }),
+    });
+    const client = createConfiguredContractClient({
+      deployment,
+      credentialFactory,
+      anchorFactory: () => ({}),
+      server: {},
+    });
+    await expect(client.issue(
+      'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+      'sp-demo-001',
+    )).rejects.toThrow(/SimulationRejected/);
   });
 });

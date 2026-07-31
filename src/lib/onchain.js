@@ -134,9 +134,30 @@ export function createConfiguredContractClient(options = globalThis.__SELYOPASS_
   const anchors = () => anchorFactory(base(anchorId));
   const assemble = async (method, publicKey, args) => {
     const transaction = await credentials(publicKey)[method](args);
+    // A contract method returning Result<T, E> can simulate successfully at
+    // the RPC level while the contract's own logic already decided to
+    // reject the call (e.g. a duplicate credential ID). Left unchecked, that
+    // rejection was previously discarded here and the caller went on to ask
+    // the wallet to sign and submit a transaction that was always going to
+    // fail, burning the full confirm() budget before any error surfaced.
+    if (typeof transaction.result?.isErr === 'function' && transaction.result.isErr()) {
+      throw new Error(`SimulationRejected: the contract rejected this ${method} before signing.`);
+    }
     return { unsignedXdr: transaction.toXDR() };
   };
   const read = async (method, args) => unwrap((await credentials()[method](args)).result);
+  const existsById = async (id) => read('exists', { credential_id: credentialIdBytes(id) });
+  const assertNotExists = async (id) => {
+    // Checked here, client-side, because the contract's own AlreadyExists
+    // rejection decodes to an empty message (see assemble()'s comment) and
+    // would otherwise still cost the user a real wallet signature and a
+    // full RPC submission before failing. Both request() and
+    // request_refresh() apply this identical check to their new
+    // credential_id in the contract, so both precheck it the same way here.
+    if (await existsById(id)) {
+      throw new Error('AlreadyExists: a credential with this ID already exists on-chain.');
+    }
+  };
 
   return {
     configured: true,
@@ -144,29 +165,35 @@ export function createConfiguredContractClient(options = globalThis.__SELYOPASS_
     anchorContractId: anchorId,
     sourceSha: deployment.sourceSha || 'Not published',
     rpcUrl,
-    request: async (subject, id, documentRoot, schemaHash, expiresLedger) => assemble(
-      'request',
-      subject,
-      {
+    request: async (subject, id, documentRoot, schemaHash, expiresLedger) => {
+      await assertNotExists(id);
+      return assemble(
+        'request',
         subject,
-        credential_id: credentialIdBytes(id),
-        document_root: hexBytes(documentRoot, 'document root'),
-        schema_hash: hexBytes(schemaHash, 'schema hash'),
-        expires_ledger: expiresLedger,
-      },
-    ),
-    request_refresh: async (subject, id, previousId, documentRoot, schemaHash, expiresLedger) => assemble(
-      'request_refresh',
-      subject,
-      {
+        {
+          subject,
+          credential_id: credentialIdBytes(id),
+          document_root: hexBytes(documentRoot, 'document root'),
+          schema_hash: hexBytes(schemaHash, 'schema hash'),
+          expires_ledger: expiresLedger,
+        },
+      );
+    },
+    request_refresh: async (subject, id, previousId, documentRoot, schemaHash, expiresLedger) => {
+      await assertNotExists(id);
+      return assemble(
+        'request_refresh',
         subject,
-        credential_id: credentialIdBytes(id),
-        previous_credential_id: credentialIdBytes(previousId),
-        document_root: hexBytes(documentRoot, 'document root'),
-        schema_hash: hexBytes(schemaHash, 'schema hash'),
-        expires_ledger: expiresLedger,
-      },
-    ),
+        {
+          subject,
+          credential_id: credentialIdBytes(id),
+          previous_credential_id: credentialIdBytes(previousId),
+          document_root: hexBytes(documentRoot, 'document root'),
+          schema_hash: hexBytes(schemaHash, 'schema hash'),
+          expires_ledger: expiresLedger,
+        },
+      );
+    },
     issue: async (issuer, id) => assemble('issue', issuer, {
       issuer,
       credential_id: credentialIdBytes(id),
@@ -183,7 +210,7 @@ export function createConfiguredContractClient(options = globalThis.__SELYOPASS_
     }),
     get: async (id) => normalizeRecord(await read('get', { credential_id: credentialIdBytes(id) })),
     status: async (id) => statusName(await read('status', { credential_id: credentialIdBytes(id) })),
-    exists: async (id) => read('exists', { credential_id: credentialIdBytes(id) }),
+    exists: async (id) => existsById(id),
     is_authorized: async (anchor) => unwrap((await anchors().is_authorized({ anchor })).result),
     submit: async (signedXdr) => {
       const response = await server.sendTransaction(transactionFromXdr(signedXdr));

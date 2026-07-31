@@ -62,6 +62,18 @@ describe('transaction state machine', () => {
     expect(userFacingError(new Error('Error(Contract, #4) InvalidTransition'))).toMatch(/not in a state/i);
     expect(userFacingError(new Error('Error(Contract, #7) InvalidExpiry'))).toMatch(/future testnet expiry/i);
   });
+
+  it('maps a pre-signature simulation rejection to a clear message instead of a generic contract-authorization guess', () => {
+    // The generated contract bindings decode CredentialError variants to an
+    // *empty* message (the Rust enum has no doc comments, which is what the
+    // SDK uses to build error text), so onchain.js's assemble() cannot name
+    // the real variant here. It still must not silently proceed to signature
+    // and RPC submission for a call the contract already rejected at
+    // simulation, nor should the resulting message fall through to the
+    // authorization-guess text meant for actual contract/auth failures.
+    expect(userFacingError(new Error('SimulationRejected: the contract rejected this request before signing.')))
+      .toMatch(/rejected this request during simulation/i);
+  });
 });
 
 describe('event polling', () => {

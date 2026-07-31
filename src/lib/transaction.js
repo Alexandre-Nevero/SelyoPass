@@ -51,6 +51,14 @@ export async function runContractTransaction({ invoke, sign, submit, confirm, di
 
 export function userFacingError(error) {
   const message = error?.message || String(error || '');
+  // Checked before the wallet-decline pattern below, which would otherwise
+  // match on the word "rejected" in this message too. The generated contract
+  // bindings decode CredentialError variants using the Rust enum's doc
+  // comments, which don't exist on this contract, so a real simulation
+  // rejection reaches here with no variant name to match against below. It
+  // must still be reported as a pre-signature rejection, not misread as a
+  // declined wallet signature or fall through to the timeout pattern.
+  if (/SimulationRejected/i.test(message)) return "The contract rejected this request during simulation, before asking you to sign. Check the credential's current on-chain status (existing record, wrong state, or authorization) and try again.";
   if (/reject|declin|denied/i.test(message)) return 'Wallet signature declined. Review the request and try again.';
   if (/network/i.test(message)) return 'Wallet is on the wrong network. Switch it to Stellar Testnet and try again.';
   if (/unfunded|account.*not found|not found.*account/i.test(message)) return 'This Testnet account is unfunded. Fund it with Friendbot, then try again.';
