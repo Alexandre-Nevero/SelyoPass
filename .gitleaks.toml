@@ -1,0 +1,18 @@
+title = "SelyoPass gitleaks config"
+
+# Extend the default gitleaks ruleset; we only add narrow allowlist exceptions
+# below, we do not disable or replace any detection rule.
+[extend]
+useDefault = true
+
+# Stellar public identifiers are never secret: contract IDs start with "C",
+# account/public keys start with "G", both are base32 (A-Z, 2-7), 56 chars.
+# Their high entropy trips the generic "generic-api-key" rule as a false
+# positive whenever one is documented (README, docs, deployment manifests).
+# Private/secret keys use a distinct "S" prefix and are not covered by this
+# allowlist, so this does not weaken detection of an actual leaked secret.
+[allowlist]
+description = "Stellar public contract and account identifiers (not secrets)"
+regexes = [
+  '''\b[CG][A-Z2-7]{55}\b''',
+]
