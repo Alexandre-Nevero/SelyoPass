@@ -1,8 +1,24 @@
 # SelyoPass
 
+**Founder:** Alexandre Nevero
+
 SelyoPass is a testnet prototype for carrying portable Philippine KYB evidence between a startup, a simulated anchor, and a relying institution. It is a **secure data courier, not a compliance stamp**: it can prove record integrity and provenance, but every institution still makes its own KYB decision.
 
 **Live demo (Stellar Testnet):** https://alexandre-nevero.github.io/SelyoPass/
+
+**Demo video:** https://drive.google.com/file/d/1E-6p6m0sYnhyf09cpLWFyUCjkKKy5HMU/view?usp=sharing
+
+## Deployed contracts (Stellar Testnet)
+
+| Contract | Address |
+|---|---|
+| Anchor Registry | `CBBYFSYQEREJGQQOUF2CIKSFU6T55FTQP3BLHZIGAZI5QD2TFGFVHO2V` |
+| Credential Registry | `CDILPOSCCJYHRAIF7HGUCFI3V2AKDV2AD36DKQ33M4PDS3YEQWPOVCT4` |
+
+Full deployment record (WASM hashes, deploy transaction hashes): [deployments/testnet.json](./deployments/testnet.json)
+
+**Example transaction hash (credential request, independently confirmed via [Stellar Expert](https://stellar.expert/explorer/testnet/tx/1ccc2679002ddbb3d67e0bfba65a3a8e20b7171e25308a5733de8d66178d2524)):**
+`1ccc2679002ddbb3d67e0bfba65a3a8e20b7171e25308a5733de8d66178d2524`
 
 ## Current status
 
@@ -18,12 +34,37 @@ This branch contains the recovery implementation plus immutable credential fresh
 - explicit transaction and evidence states;
 - Vitest, Rust, release-WASM, Playwright, accessibility, documentation, and manifest checks.
 
-A protected testnet release has run. [deployments/testnet.json](./deployments/testnet.json) records real contract IDs, WASM hashes, and transaction hashes for both contracts and one full base-plus-refresh lifecycle exercised by the release workflow itself:
+A protected testnet release has run. [deployments/testnet.json](./deployments/testnet.json) records real contract IDs, WASM hashes, and transaction hashes for both contracts, and separate wallet-signed requests (Freighter) and issuances (Albedo) have been executed against the live deployment above — see screenshots below.
 
-- Anchor Registry: `CBBYFSYQEREJGQQOUF2CIKSFU6T55FTQP3BLHZIGAZI5QD2TFGFVHO2V`
-- Credential Registry: `CDILPOSCCJYHRAIF7HGUCFI3V2AKDV2AD36DKQ33M4PDS3YEQWPOVCT4`
+This is an **experimental, testnet-only** feature: no mainnet deployment, real anchor, or Level 4 approval is claimed. The simulated anchor has no secret in this repository or browser bundle.
 
-This is an **experimental, testnet-only** feature: no mainnet deployment, real anchor, or Level 4 approval is claimed. [submission/evidence.json](./submission/evidence.json) remains in draft: the release workflow's own lifecycle run is on-chain, but hand-signed Freighter and Albedo evidence (screenshots, RPC proofs, a demo video) from a real wallet session has not yet been captured against this deployment. The simulated anchor has no secret in this repository or browser bundle.
+## Screenshots
+
+**1. Wallet picker (Freighter and Albedo)**
+![Wallet picker](./submission/screenshots/01-wallet-picker.png)
+
+**2. Credential request — confirmed transaction receipt**
+![Base request receipt](./submission/screenshots/02-base-request-receipt.png)
+
+**3. Same request transaction, independently confirmed on Stellar Expert**
+![Base request on Stellar Expert](./submission/screenshots/03-base-request-stellar-expert.png)
+
+**4. Credential issuance — confirmed transaction receipt**
+![Base issue receipt](./submission/screenshots/04-base-issue-receipt.png)
+
+**5. Same issuance transaction, independently confirmed on Stellar Expert**
+![Base issue on Stellar Expert](./submission/screenshots/05-base-issue-stellar-expert.png)
+
+**6. Wallet-free credential lookup on `#/verify`**
+![Verify lookup](./submission/screenshots/06-verify-base-credential-id-lookup.png)
+
+**7. Mobile-responsive UI (390px width) — connected wallet and confirmed transaction**
+![Mobile UI](./submission/screenshots/07-mobile-prepare-request-receipt.png)
+
+**8. CI/CD pipeline running and passing**
+![CI green](./submission/screenshots/08-ci-deploy-pages-green.png)
+
+Test suite: 9 Vitest files / 46+ tests, Rust unit tests, Playwright end-to-end and accessibility checks, all run in the `CI` GitHub Actions workflow on every push to `main` — [latest green run](https://github.com/Alexandre-Nevero/SelyoPass/actions/runs/30641388858).
 
 ## Product routes
 
