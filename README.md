@@ -4,24 +4,25 @@ SelyoPass is a testnet prototype for carrying portable Philippine KYB evidence b
 
 ## Current status
 
-This branch contains the recovery implementation for the June 30 Stellar Level 3 + APAC submission:
+This branch contains the recovery implementation plus immutable credential freshness for the June 30 Stellar Level 3 + APAC submission:
 
 - two Soroban contracts on protocol 27: Anchor Registry and Credential Registry;
 - startup-authorized requests and registry-authorized issue/reject/revoke actions;
-- real cross-contract anchor authorization and typed contract events;
+- immutable credential refresh and supersession: a subject can request a refresh against an existing credential, the anchor issues a successor, and the predecessor is atomically marked superseded and linked to its successor;
+- real cross-contract anchor authorization and typed contract events, including refresh-specific events;
 - generated TypeScript bindings checked against optimized release WASMs;
 - Freighter and Albedo through Stellar Wallets Kit 2.5.0;
-- local document hashing, hash-only public payloads, and wallet-free verification;
+- local document hashing, hash-only public payloads, and wallet-free verification that follows successor links with cycle detection;
 - explicit transaction and evidence states;
 - Vitest, Rust, release-WASM, Playwright, accessibility, documentation, and manifest checks.
 
-No reviewed deployment of these recovery contracts exists yet. [deployments/testnet.json](./deployments/testnet.json) is deliberately marked `not_deployed`; no contract ID, transaction hash, live demo, or submission evidence is claimed until the protected release workflow produces it. The simulated anchor has no secret in this repository or browser bundle.
+A protected testnet release has run and [deployments/testnet.json](./deployments/testnet.json) now records real contract IDs, WASM hashes, and transaction hashes for both contracts and the full base-plus-refresh lifecycle. This is an **experimental, testnet-only** feature: no mainnet deployment, real anchor, or Level 4 approval is claimed. [submission/evidence.json](./submission/evidence.json) remains in draft until wallet-signed evidence (Freighter and Albedo interaction receipts, screenshots, RPC proofs) is captured. The simulated anchor has no secret in this repository or browser bundle.
 
 ## Product routes
 
-- `#/prepare` — hash synthetic files locally, review the public payload, connect Freighter or Albedo, and request a credential.
-- `#/anchor` — explicitly labelled simulated-anchor console for authorized testnet issue/reject/revoke actions.
-- `#/verify` — wallet-free local and on-chain integrity checks.
+- `#/prepare` — hash synthetic files locally, review the public payload, connect Freighter or Albedo, and request a new credential or a refresh of an existing one.
+- `#/anchor` — explicitly labelled simulated-anchor console for authorized testnet issue/reject/revoke actions, covering both base and refresh requests.
+- `#/verify` — wallet-free local and on-chain integrity checks, including superseded-credential and successor-link verification.
 
 The root screen routes people to preparation or verification. GitHub Pages uses hash routes so refreshes do not require a server rewrite.
 
@@ -30,9 +31,10 @@ The root screen routes people to preparation or verification. GitHub Pages uses 
 The browser SPA has no SelyoPass backend or database.
 
 1. The startup hashes synthetic documents locally.
-2. Credential Registry stores only the subject address, credential ID hash, document root, schema hash, status, issuer, reason code, and ledger metadata.
+2. Credential Registry stores only the subject address, credential ID hash, document root, schema hash, status, issuer, reason code, previous/successor credential IDs, and ledger metadata.
 3. Issue/reject/revoke requires issuer authorization; issuance calls Anchor Registry to prove the issuer is currently authorized.
-4. The relying party re-hashes presented files and checks registry record, issuer authorization, lifecycle status, and issuance-event evidence independently.
+4. A refresh request links a new credential to an existing one; on issuance, the predecessor is atomically marked superseded and linked forward to its successor.
+5. The relying party re-hashes presented files and checks registry record, issuer authorization, lifecycle status, successor linkage, and issuance-event evidence independently.
 
 Document bytes, organization names, registration numbers, and beneficial-owner data must never go on-chain. Testnet fixtures must remain synthetic.
 
