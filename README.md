@@ -2,6 +2,8 @@
 
 SelyoPass is a testnet prototype for carrying portable Philippine KYB evidence between a startup, a simulated anchor, and a relying institution. It is a **secure data courier, not a compliance stamp**: it can prove record integrity and provenance, but every institution still makes its own KYB decision.
 
+**Live demo (Stellar Testnet):** https://alexandre-nevero.github.io/SelyoPass/
+
 ## Current status
 
 This branch contains the recovery implementation plus immutable credential freshness for the June 30 Stellar Level 3 + APAC submission:
@@ -16,7 +18,12 @@ This branch contains the recovery implementation plus immutable credential fresh
 - explicit transaction and evidence states;
 - Vitest, Rust, release-WASM, Playwright, accessibility, documentation, and manifest checks.
 
-A protected testnet release has run and [deployments/testnet.json](./deployments/testnet.json) now records real contract IDs, WASM hashes, and transaction hashes for both contracts and the full base-plus-refresh lifecycle. This is an **experimental, testnet-only** feature: no mainnet deployment, real anchor, or Level 4 approval is claimed. [submission/evidence.json](./submission/evidence.json) remains in draft until wallet-signed evidence (Freighter and Albedo interaction receipts, screenshots, RPC proofs) is captured. The simulated anchor has no secret in this repository or browser bundle.
+A protected testnet release has run. [deployments/testnet.json](./deployments/testnet.json) records real contract IDs, WASM hashes, and transaction hashes for both contracts and one full base-plus-refresh lifecycle exercised by the release workflow itself:
+
+- Anchor Registry: `CBBYFSYQEREJGQQOUF2CIKSFU6T55FTQP3BLHZIGAZI5QD2TFGFVHO2V`
+- Credential Registry: `CDILPOSCCJYHRAIF7HGUCFI3V2AKDV2AD36DKQ33M4PDS3YEQWPOVCT4`
+
+This is an **experimental, testnet-only** feature: no mainnet deployment, real anchor, or Level 4 approval is claimed. [submission/evidence.json](./submission/evidence.json) remains in draft: the release workflow's own lifecycle run is on-chain, but hand-signed Freighter and Albedo evidence (screenshots, RPC proofs, a demo video) from a real wallet session has not yet been captured against this deployment. The simulated anchor has no secret in this repository or browser bundle.
 
 ## Product routes
 
