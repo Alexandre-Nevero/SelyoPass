@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import deployment from '../deployments/testnet.json' with { type: 'json' };
+
+const expectedConfigurationText = deployment.status === 'deployed'
+  ? 'configured'
+  : 'not configured';
 
 for (const viewport of [
   { name: 'mobile', width: 390, height: 844 },
@@ -15,7 +20,7 @@ for (const viewport of [
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/#/prepare');
     await expect(page.getByRole('heading', { name: 'Prepare a presentation request' })).toBeFocused();
-    await expect(page.getByRole('status')).toContainText('not configured');
+    await expect(page.getByRole('status')).toContainText(expectedConfigurationText);
     await expect(page.getByRole('link', { name: 'Prepare' })).toHaveAttribute('aria-current', 'page');
     if (viewport.name === 'mobile') {
       await expect(page.locator('.action-bar')).toHaveCSS('position', 'static');

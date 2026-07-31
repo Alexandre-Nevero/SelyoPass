@@ -1,26 +1,27 @@
 {
   "schemaVersion": 1,
   "network": "testnet",
-  "status": "not_deployed",
-  "sourceSha": null,
-  "releasedAt": null,
+  "status": "deployed",
+  "sourceSha": "9ddd8d576048ce7761290dc0fed67c4dfeefa0a2",
+  "releasedAt": "2026-07-31T06:03:44Z",
   "rpcUrl": "https://soroban-testnet.stellar.org",
   "contracts": {
     "anchorRegistry": {
-      "id": null,
-      "wasmSha256": null,
-      "deployTxHash": null
+      "id": "CBBYFSYQEREJGQQOUF2CIKSFU6T55FTQP3BLHZIGAZI5QD2TFGFVHO2V",
+      "wasmSha256": "2e6655f8170596eeea504f5ed0a68abdc4c9b1a37fb0859bb8471a6bd1bfcd6a",
+      "deployTxHash": "2008ff78c0a58c86631e482fc56b06fd75174db014b89e775ea5c1898bf32d24"
     },
     "credentialRegistry": {
-      "id": null,
-      "wasmSha256": null,
-      "deployTxHash": null
+      "id": "CDILPOSCCJYHRAIF7HGUCFI3V2AKDV2AD36DKQ33M4PDS3YEQWPOVCT4",
+      "wasmSha256": "d099ee9ced6a0cec24f80b74abce33311e149d4233722f15cc81b1a69707faef",
+      "deployTxHash": "8f6a1d9cf42873d6668172574e1cf4e0f55925fd1adf5bca0cb9f4a64e48d5f5"
     }
   },
   "interactions": {
-    "anchorRegistrationTxHash": null,
-    "requestTxHash": null,
-    "issueTxHash": null
-  },
-  "blocker": "A reviewed protected testnet release has not run yet. No issuer secret is stored in this repository."
+    "anchorRegistrationTxHash": "f2389e8c7f98b87facbbfd3f32233023b3105739359f6eb61b17aea61beb771e",
+    "requestTxHash": "d7613bc604ed4f8ffb465c8dcfed2c56d82da13b95a256833ff0cdc2f83d69e3",
+    "issueTxHash": "a533c10cb8c0c1644f6335cf3771d6664c9f1d707cf2a563137d1b80c8b87748",
+    "refreshRequestTxHash": "0ceab813f9e01ba05617ba6e7a2a04f92690694ab5e26cc2bdd11bfc13717bf4",
+    "refreshIssueTxHash": "3670ca7f2c0f3e46dd045fd295a572dc453c3b0a0a524d9b67b4f8c61571c0f3"
+  }
 }
