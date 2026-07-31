@@ -193,11 +193,16 @@ export function createConfiguredContractClient(options = globalThis.__SELYOPASS_
       return { hash: response.hash };
     },
     confirm: async (transactionHash) => {
-      for (let attempt = 0; attempt < 20; attempt += 1) {
+      // 30 attempts at 1s gives ~30s of budget. Soroban testnet ledgers close
+      // roughly every 5-6s, and confirmation typically needs 2-3 closes to be
+      // safely observed via RPC; 20 attempts (~20s) was too tight under any
+      // ingestion lag and produced a false "RPC request timed out" even when
+      // the underlying transaction had actually succeeded.
+      for (let attempt = 0; attempt < 30; attempt += 1) {
         const response = await server.getTransaction(transactionHash);
         if (response.status === 'SUCCESS') return response;
         if (response.status === 'FAILED') return response;
-        if (attempt < 19) await sleep(1000);
+        if (attempt < 29) await sleep(1000);
       }
       throw new Error('RPC confirmation timeout.');
     },

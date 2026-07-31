@@ -21,8 +21,21 @@ export function createWalletService({
       if (!ids[kind]) throw new WalletError('Only Freighter and Albedo are supported in this build.');
       try {
         kit.setWallet(ids[kind]);
-        const { address } = await kit.fetchAddress();
-        const network = await kit.getNetwork();
+        // authModal() (not fetchAddress()) drives the wallet's real interactive
+        // connect flow. fetchAddress() assumes a wallet is already connected and
+        // skips that flow, which is why Freighter fell back to opening a full
+        // browser tab instead of its normal small popup window.
+        const { address } = await kit.authModal();
+        // Albedo's module does not implement getNetwork() — it always throws.
+        // Treat that as "network could not be verified" rather than "wrong
+        // network"; Albedo's own UI already lets the user pick testnet per
+        // session, and Albedo enforces the network at sign time regardless.
+        let network = null;
+        try {
+          network = await kit.getNetwork();
+        } catch (networkError) {
+          if (!/does not support/i.test(networkError?.message || '')) throw networkError;
+        }
         if (network?.networkPassphrase && network.networkPassphrase !== Networks.TESTNET) {
           throw new WalletError('Wallet is on the wrong network. Switch it to Stellar Testnet.');
         }

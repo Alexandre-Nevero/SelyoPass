@@ -53,8 +53,21 @@ export function userFacingError(error) {
   const message = error?.message || String(error || '');
   if (/reject|declin|denied/i.test(message)) return 'Wallet signature declined. Review the request and try again.';
   if (/network/i.test(message)) return 'Wallet is on the wrong network. Switch it to Stellar Testnet and try again.';
-  if (/unfunded|not found.*account/i.test(message)) return 'This Testnet account is unfunded. Fund it with Friendbot, then try again.';
+  if (/unfunded|account.*not found|not found.*account/i.test(message)) return 'This Testnet account is unfunded. Fund it with Friendbot, then try again.';
   if (/balance|insufficient|fee/i.test(message)) return 'This account needs enough Testnet XLM for the transaction fee.';
+  // Contract-level rejections must be checked before the timeout/RPC pattern
+  // below: Soroban's simulateTransaction can wrap a legitimate contract error
+  // (e.g. a duplicate credential request) in generic text that mentions "rpc"
+  // or "simulation", which previously made an AlreadyExists rejection display
+  // as a false "RPC request timed out" message.
+  if (/AlreadyExists/i.test(message)) return 'A credential with this ID already has a pending or issued record. Use a new Credential ID, or check the anchor console for its current status.';
+  if (/NotFound/i.test(message)) return 'No credential record exists for this ID yet.';
+  if (/InvalidTransition/i.test(message)) return 'This credential is not in a state that allows that action right now.';
+  if (/IssuerNotAuthorized|NotOriginalIssuer|IssuerDiscontinuity/i.test(message)) return 'The contract rejected this action. Confirm the simulated anchor is authorized.';
+  if (/CredentialExpired/i.test(message)) return 'This credential has expired on Testnet.';
+  if (/InvalidExpiry/i.test(message)) return 'Enter a future Testnet expiry ledger.';
+  if (/SubjectMismatch/i.test(message)) return 'This credential belongs to a different subject wallet.';
+  if (/NonRefreshableState|PendingSuccessorExists/i.test(message)) return 'This credential is not eligible for a refresh right now.';
   if (/timeout|rpc|network request/i.test(message)) return 'The Stellar RPC request timed out. Check your connection and try again.';
   if (/contract|authorization|unauthorized/i.test(message)) return 'The contract rejected this action. Confirm the simulated anchor is authorized.';
   if (/unavailable|not installed|extension/i.test(message)) return 'That wallet is unavailable. Install or unlock it, then try again.';

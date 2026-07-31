@@ -50,6 +50,18 @@ describe('transaction state machine', () => {
     expect(userFacingError(new Error('insufficient balance'))).toMatch(/XLM/i);
     expect(userFacingError(new Error('RPC timeout'))).toMatch(/RPC/i);
   });
+
+  it('maps contract rejections to their real cause, not a false RPC timeout', () => {
+    // A duplicate credential request fails at simulation with the contract's
+    // AlreadyExists error. The SDK's wrapped error text can otherwise contain
+    // words like "rpc" or "simulation", which must not be misread as a
+    // network timeout.
+    expect(userFacingError(new Error('HostError: Error(Contract, #1) AlreadyExists during rpc simulation')))
+      .toMatch(/already has a pending or issued record/i);
+    expect(userFacingError(new Error('Error(Contract, #2) NotFound'))).toMatch(/no credential record/i);
+    expect(userFacingError(new Error('Error(Contract, #4) InvalidTransition'))).toMatch(/not in a state/i);
+    expect(userFacingError(new Error('Error(Contract, #7) InvalidExpiry'))).toMatch(/future testnet expiry/i);
+  });
 });
 
 describe('event polling', () => {
